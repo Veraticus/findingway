@@ -21,52 +21,16 @@ type Listing struct {
 	Party       []*Slot
 }
 
-type Role int
-
-const (
-	DPS Role = iota
-	Healer
-	Tank
-	Any
-)
-
-type Job int
-
-const (
-	GNB Job = iota
-	PLD
-	GLD
-	DRK
-	WAR
-	MRD
-	ACN // Arcanist
-	SGE
-	AST
-	WHM
-	CNJ
-	SAM
-	DRG
-	NIN
-	MNK
-	RPR
-	BRD
-	MCH
-	DNC
-	BLM
-	BLU
-	SMN
-	RDM
-	LNC
-	PUG
-	ROG
-	THM
-	ARC // Archer
-)
-
 type Slot struct {
-	Role   Role
+	Roles  Roles
 	Job    Job
 	Filled bool
+}
+
+func NewSlot() *Slot {
+	return &Slot{
+		Roles: Roles{Roles: []Role{}},
+	}
 }
 
 func (ls *Listings) ForDuty(duty string) []*Listing {

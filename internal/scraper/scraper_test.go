@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Veraticus/trappingway/internal/ffxiv"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,5 +35,10 @@ func TestGetListings(t *testing.T) {
 	s := New(ts.URL)
 	s.Scrape()
 
-	assert.True(t, false)
+	assert.Equal(t, 677, len(s.Listings.Listings))
+
+	listing := s.Listings.Listings[100]
+	assert.Equal(t, listing.Duty, "The Unending Coil of Bahamut (Ultimate)")
+	assert.Equal(t, listing.Party[0].Job, ffxiv.AST)
+	assert.True(t, listing.Party[0].Filled)
 }

@@ -29,8 +29,7 @@ func (s *Scraper) Scrape() error {
 	fmt.Printf("Starting on URL: %v\n", s.Url)
 
 	c.OnHTML("#listings.list .listing", func(e *colly.HTMLElement) {
-		fmt.Printf("Working %v!\n", e)
-		listing := &ffxiv.Listing{}
+		listing := &ffxiv.Listing{Party: []*ffxiv.Slot{}}
 
 		// We can unmarshal a fair amount of information
 		e.Unmarshal(listing)
@@ -46,10 +45,33 @@ func (s *Scraper) Scrape() error {
 
 		// Then the party list
 		e.ForEach(".party .slot", func(s int, p *colly.HTMLElement) {
+			slot := ffxiv.NewSlot()
+			class := p.Attr("class")
 
+			if strings.Contains(class, "dps") {
+				slot.Roles.AddRole(ffxiv.DPS)
+			}
+
+			if strings.Contains(class, "healer") {
+				slot.Roles.AddRole(ffxiv.Healer)
+			}
+
+			if strings.Contains(class, "tank") {
+				slot.Roles.AddRole(ffxiv.Tank)
+			}
+
+			if strings.Contains(class, "empty") {
+				slot.Roles.AddRole(ffxiv.Empty)
+			}
+
+			if strings.Contains(class, "filled") {
+				slot.Filled = true
+				slot.Job = ffxiv.JobFromAbbreviation(p.Attr("title"))
+			}
+
+			listing.Party = append(listing.Party, slot)
 		})
 
-		fmt.Printf("Wound up with %+v\n", listing)
 		listings = append(listings, listing)
 	})
 
