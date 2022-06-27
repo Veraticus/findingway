@@ -1,0 +1,5 @@
+mode: atomic
+github.com/Veraticus/trappingway/internal/scraper/scraper.go:17.31,22.2 1 1
+github.com/Veraticus/trappingway/internal/scraper/scraper.go:24.34,31.65 4 1
+github.com/Veraticus/trappingway/internal/scraper/scraper.go:51.2,55.12 3 1
+github.com/Veraticus/trappingway/internal/scraper/scraper.go:31.65,49.3 10 677
