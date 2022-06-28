@@ -54,7 +54,7 @@ func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string
 		Title:       "Dragonsong's Reprise (Ultimate) PFs",
 		Type:        discordgo.EmbedTypeRich,
 		Color:       0x6600ff,
-		Description: fmt.Sprintf("Found %v listings at %v", len(scopedListings), time.Now().Format("15:04:05")),
+		Description: fmt.Sprintf("Found %v listings %v", len(scopedListings), fmt.Sprintf("<t:%v:R>", time.Now().Unix())),
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: strings.Repeat("\u3000", 20),
 		},
