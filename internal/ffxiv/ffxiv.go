@@ -86,3 +86,7 @@ func (l *Listing) GetTags() string {
 	}
 	return l.Tags
 }
+
+func (l *Listing) GetDescription() string {
+	return "```" + l.Description + "```"
+}

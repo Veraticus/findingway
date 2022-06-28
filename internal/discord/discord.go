@@ -40,7 +40,7 @@ func (d *Discord) CleanChannel() error {
 	for _, message := range messages {
 		err := d.Session.ChannelMessageDelete(d.ChannelId, message.ID)
 		if err != nil {
-			return fmt.Errorf("Could not delte message %+v: %f", message, err)
+			return fmt.Errorf("Could not delete message %+v: %f", message, err)
 		}
 	}
 
@@ -76,7 +76,7 @@ func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string
 		})
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   listing.GetTags(),
-			Value:  listing.Description,
+			Value:  listing.GetDescription(),
 			Inline: true,
 		})
 		fields = append(fields, &discordgo.MessageEmbedField{
