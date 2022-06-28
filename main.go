@@ -30,6 +30,11 @@ func main() {
 		panic("You must supply a DUTY to start!")
 	}
 
+	once, ok := os.LookupEnv("ONCE")
+	if !ok {
+		once = "false"
+	}
+
 	discord := &discord.Discord{
 		Token:     discordToken,
 		ChannelId: discordChannelId,
@@ -61,6 +66,10 @@ func main() {
 		err = discord.PostListings(scraper.Listings, dataCentre, duty)
 		if err != nil {
 			fmt.Printf("Discord error updating messagea: %f\n", err)
+		}
+
+		if once != "false" {
+			os.Exit(0)
 		}
 		time.Sleep(3 * time.Minute)
 	}
