@@ -62,7 +62,7 @@ func main() {
 		if err != nil {
 			fmt.Printf("Discord error updating messagea: %f\n", err)
 		}
-		time.Sleep(1 * time.Minute)
+		time.Sleep(3 * time.Minute)
 	}
 
 }
