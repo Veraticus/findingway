@@ -52,12 +52,8 @@ func (d *Discord) UpdateMessage(listings *ffxiv.Listings, datacentre, duty strin
 		})
 	}
 
-	fmt.Printf("Total fields: %v\n", len(fields))
-	for _, field := range fields {
-		fmt.Printf("Field is: %+v\n", field)
-	}
-
 	embed := &discordgo.MessageEmbed{
+		Title:       "Dragonsong's Reprise (Ultimate) PFs",
 		Type:        discordgo.EmbedTypeRich,
 		Color:       0x6600ff,
 		Description: "Last updated at " + time.Now().Format("15:04:05"),
@@ -80,11 +76,11 @@ func (d *Discord) UpdateMessage(listings *ffxiv.Listings, datacentre, duty strin
 			ID:      d.MessageId,
 			Channel: d.ChannelId,
 		}
-		message, err := d.Session.ChannelMessageEditComplex(messageEdit)
+		_, err := d.Session.ChannelMessageEditComplex(messageEdit)
 		if err != nil {
 			return fmt.Errorf("Could not update message: %f", err)
 		}
-		fmt.Printf("Returned message is: %+v\n", message)
+		fmt.Print("Updated listings!\n")
 	}
 
 	return nil

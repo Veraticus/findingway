@@ -71,5 +71,8 @@ func (l *Listing) GetUpdated() string {
 }
 
 func (l *Listing) GetTags() string {
-	return strings.Replace(strings.Replace(l.Tags, "[", "", -1), "]", "", -1)
+	if len(l.Tags) == 0 {
+		return " "
+	}
+	return l.Tags
 }
