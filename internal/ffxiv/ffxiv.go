@@ -47,6 +47,16 @@ func (ls *Listings) ForDataCentreAndDuty(datacentre, duty string) []*Listing {
 	return listings
 }
 
+func (ls *Listings) Add(l *Listing) {
+	for _, existingListing := range ls.Listings {
+		if existingListing.Creator == l.Creator {
+			return
+		}
+	}
+
+	ls.Listings = append(ls.Listings, l)
+}
+
 func (l *Listing) PartyDisplay() string {
 	var party strings.Builder
 
@@ -63,16 +73,16 @@ func (l *Listing) PartyDisplay() string {
 }
 
 func (l *Listing) GetExpires() string {
-	return "<:ffxivhourglass:987141579879878676> " + l.Expires
+	return "<:hourglass:991379574187372655> " + l.Expires
 }
 
 func (l *Listing) GetUpdated() string {
-	return "<:ffxivstopwatch:987141580869730324> " + l.Updated
+	return "<:stopwatch:991379573000388758> " + l.Updated
 }
 
 func (l *Listing) GetTags() string {
 	if len(l.Tags) == 0 {
-		return " "
+		return "_ _"
 	}
 	return l.Tags
 }

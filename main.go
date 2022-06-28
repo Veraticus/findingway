@@ -30,12 +30,9 @@ func main() {
 		panic("You must supply a DUTY to start!")
 	}
 
-	discordMessageId, ok := os.LookupEnv("DISCORD_MESSAGE_ID")
-
 	discord := &discord.Discord{
 		Token:     discordToken,
 		ChannelId: discordChannelId,
-		MessageId: discordMessageId,
 	}
 	err := discord.Start()
 	defer discord.Session.Close()
@@ -54,10 +51,16 @@ func main() {
 			continue
 		}
 
-		fmt.Printf("Updating Discord...\n")
-		err = discord.UpdateMessage(scraper.Listings, dataCentre, duty)
+		fmt.Printf("Cleaning Discord...\n")
+		err = discord.CleanChannel()
 		if err != nil {
-			fmt.Printf("Discord error: %f\n", err)
+			fmt.Printf("Discord error cleaning channel: %f\n", err)
+		}
+
+		fmt.Printf("Updating Discord...\n")
+		err = discord.PostListings(scraper.Listings, dataCentre, duty)
+		if err != nil {
+			fmt.Printf("Discord error updating messagea: %f\n", err)
 		}
 		time.Sleep(1 * time.Minute)
 	}

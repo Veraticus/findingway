@@ -21,7 +21,7 @@ func New(url string) *Scraper {
 }
 
 func (s *Scraper) Scrape() error {
-	listings := []*ffxiv.Listing{}
+	listings := &ffxiv.Listings{}
 
 	c := colly.NewCollector()
 
@@ -46,19 +46,19 @@ func (s *Scraper) Scrape() error {
 			class := p.Attr("class")
 
 			if strings.Contains(class, "dps") {
-				slot.Roles.AddRole(ffxiv.DPS)
+				slot.Roles.Roles = append(slot.Roles.Roles, ffxiv.DPS)
 			}
 
 			if strings.Contains(class, "healer") {
-				slot.Roles.AddRole(ffxiv.Healer)
+				slot.Roles.Roles = append(slot.Roles.Roles, ffxiv.Healer)
 			}
 
 			if strings.Contains(class, "tank") {
-				slot.Roles.AddRole(ffxiv.Tank)
+				slot.Roles.Roles = append(slot.Roles.Roles, ffxiv.Tank)
 			}
 
 			if strings.Contains(class, "empty") {
-				slot.Roles.AddRole(ffxiv.Empty)
+				slot.Roles.Roles = append(slot.Roles.Roles, ffxiv.Empty)
 			}
 
 			if strings.Contains(class, "filled") {
@@ -69,12 +69,12 @@ func (s *Scraper) Scrape() error {
 			listing.Party = append(listing.Party, slot)
 		})
 
-		listings = append(listings, listing)
+		listings.Add(listing)
 	})
 
 	c.Visit(s.Url + "/listings")
 
-	s.Listings.Listings = listings
+	s.Listings = listings
 
 	return nil
 }

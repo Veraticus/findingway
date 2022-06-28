@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Veraticus/trappingway/internal/ffxiv"
@@ -11,7 +12,6 @@ import (
 
 type Discord struct {
 	Token     string
-	MessageId string
 	ChannelId string
 
 	Session *discordgo.Session
@@ -32,9 +32,43 @@ func (d *Discord) Start() error {
 	return nil
 }
 
-func (d *Discord) UpdateMessage(listings *ffxiv.Listings, datacentre, duty string) error {
+func (d *Discord) CleanChannel() error {
+	messages, err := d.Session.ChannelMessages(d.ChannelId, 100, "", "", "")
+	if err != nil {
+		return fmt.Errorf("Could not list messages: %f", err)
+	}
+	for _, message := range messages {
+		err := d.Session.ChannelMessageDelete(d.ChannelId, message.ID)
+		if err != nil {
+			return fmt.Errorf("Could not delte message %+v: %f", message, err)
+		}
+	}
+
+	return nil
+}
+
+func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string) error {
+	scopedListings := listings.ForDataCentreAndDuty(datacentre, duty)
+
+	headerEmbed := &discordgo.MessageEmbed{
+		Title:       "Dragonsong's Reprise (Ultimate) PFs",
+		Type:        discordgo.EmbedTypeRich,
+		Color:       0x6600ff,
+		Description: fmt.Sprintf("Found %v listings at %v", len(scopedListings), time.Now().Format("15:04:05")),
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: strings.Repeat("\u3000", 20),
+		},
+	}
+	headerMessageSend := &discordgo.MessageSend{
+		Embeds: []*discordgo.MessageEmbed{headerEmbed},
+	}
+	_, err := d.Session.ChannelMessageSendComplex(d.ChannelId, headerMessageSend)
+	if err != nil {
+		return fmt.Errorf("Could not send header: %f", err)
+	}
+
 	fields := []*discordgo.MessageEmbedField{}
-	for _, listing := range listings.ForDataCentreAndDuty(datacentre, duty) {
+	for i, listing := range scopedListings {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   listing.Creator,
 			Value:  listing.PartyDisplay(),
@@ -50,37 +84,43 @@ func (d *Discord) UpdateMessage(listings *ffxiv.Listings, datacentre, duty strin
 			Value:  listing.GetUpdated(),
 			Inline: true,
 		})
-	}
 
-	embed := &discordgo.MessageEmbed{
-		Title:       "Dragonsong's Reprise (Ultimate) PFs",
-		Type:        discordgo.EmbedTypeRich,
-		Color:       0x6600ff,
-		Description: "Last updated at " + time.Now().Format("15:04:05"),
-		Fields:      fields,
-	}
-
-	if len(d.MessageId) == 0 {
-		messageSend := &discordgo.MessageSend{
-			Embeds: []*discordgo.MessageEmbed{embed},
+		// Send a message every 5 listings
+		if i%5 == 0 && i != 0 {
+			err = d.sendMessage(fields)
+			if err != nil {
+				return fmt.Errorf("Could not send message: %f", err)
+			}
+			fields = []*discordgo.MessageEmbedField{}
 		}
-		message, err := d.Session.ChannelMessageSendComplex(d.ChannelId, messageSend)
+	}
+
+	// Ensure we send any remaining messages
+	if len(fields) != 0 {
+		err = d.sendMessage(fields)
 		if err != nil {
 			return fmt.Errorf("Could not send message: %f", err)
 		}
-		fmt.Printf("Created new message! ID is: %v\n", message.ID)
-		d.MessageId = message.ID
-	} else {
-		messageEdit := &discordgo.MessageEdit{
-			Embeds:  []*discordgo.MessageEmbed{embed},
-			ID:      d.MessageId,
-			Channel: d.ChannelId,
-		}
-		_, err := d.Session.ChannelMessageEditComplex(messageEdit)
-		if err != nil {
-			return fmt.Errorf("Could not update message: %f", err)
-		}
-		fmt.Print("Updated listings!\n")
+	}
+
+	return nil
+}
+
+func (d *Discord) sendMessage(fields []*discordgo.MessageEmbedField) error {
+	embed := &discordgo.MessageEmbed{
+		Type:   discordgo.EmbedTypeRich,
+		Color:  0x6600ff,
+		Fields: fields,
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: strings.Repeat("\u3000", 20),
+		},
+	}
+	messageSend := &discordgo.MessageSend{
+		Embeds: []*discordgo.MessageEmbed{embed},
+	}
+	_, err := d.Session.ChannelMessageSendComplex(d.ChannelId, messageSend)
+	if err != nil {
+		return err
 	}
 
 	return nil
