@@ -1,7 +1,6 @@
 package scraper
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Veraticus/trappingway/internal/ffxiv"
@@ -25,8 +24,6 @@ func (s *Scraper) Scrape() error {
 	listings := []*ffxiv.Listing{}
 
 	c := colly.NewCollector()
-
-	fmt.Printf("Starting on URL: %v\n", s.Url)
 
 	c.OnHTML("#listings.list .listing", func(e *colly.HTMLElement) {
 		listing := &ffxiv.Listing{Party: []*ffxiv.Slot{}}
