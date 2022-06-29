@@ -86,7 +86,7 @@ func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string
 		})
 
 		// Send a message every 5 listings
-		if i%5 == 0 && i != 0 {
+		if (i+1)%5 == 0 {
 			err = d.sendMessage(fields)
 			if err != nil {
 				return fmt.Errorf("Could not send message: %f", err)
