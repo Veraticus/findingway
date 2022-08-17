@@ -61,11 +61,11 @@ func main() {
 			if err != nil {
 				fmt.Printf("Discord error updating messagea: %f\n", err)
 			}
-
-			if once != "false" {
-				os.Exit(0)
-			}
 		}
+		if once != "false" {
+			os.Exit(0)
+		}
+
 		time.Sleep(3 * time.Minute)
 	}
 
