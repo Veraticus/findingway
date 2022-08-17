@@ -11,10 +11,16 @@ import (
 )
 
 type Discord struct {
-	Token     string
-	ChannelId string
+	Token string
 
-	Session *discordgo.Session
+	Session  *discordgo.Session
+	Channels []*Channel `yaml:"channels"`
+}
+
+type Channel struct {
+	ID          string   `yaml:"id"`
+	Duty        string   `yaml:"duty"`
+	DataCentres []string `yaml:"dataCentres"`
 }
 
 func (d *Discord) Start() error {
@@ -32,13 +38,13 @@ func (d *Discord) Start() error {
 	return nil
 }
 
-func (d *Discord) CleanChannel() error {
-	messages, err := d.Session.ChannelMessages(d.ChannelId, 100, "", "", "")
+func (d *Discord) CleanChannel(channelId string) error {
+	messages, err := d.Session.ChannelMessages(channelId, 100, "", "", "")
 	if err != nil {
 		return fmt.Errorf("Could not list messages: %f", err)
 	}
 	for _, message := range messages {
-		err := d.Session.ChannelMessageDelete(d.ChannelId, message.ID)
+		err := d.Session.ChannelMessageDelete(channelId, message.ID)
 		if err != nil {
 			return fmt.Errorf("Could not delete message %+v: %f", message, err)
 		}
@@ -47,11 +53,11 @@ func (d *Discord) CleanChannel() error {
 	return nil
 }
 
-func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string) error {
-	scopedListings := listings.ForDataCentreAndDuty(datacentre, duty)
+func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty string, dataCentres []string) error {
+	scopedListings := listings.ForDutyAndDataCentres(duty, dataCentres)
 
 	headerEmbed := &discordgo.MessageEmbed{
-		Title:       "Dragonsong's Reprise (Ultimate) PFs",
+		Title:       fmt.Sprintf("%s PFs", duty),
 		Type:        discordgo.EmbedTypeRich,
 		Color:       0x6600ff,
 		Description: fmt.Sprintf("Found %v listings %v", len(scopedListings), fmt.Sprintf("<t:%v:R>", time.Now().Unix())),
@@ -62,7 +68,7 @@ func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string
 	headerMessageSend := &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{headerEmbed},
 	}
-	_, err := d.Session.ChannelMessageSendComplex(d.ChannelId, headerMessageSend)
+	_, err := d.Session.ChannelMessageSendComplex(channelId, headerMessageSend)
 	if err != nil {
 		return fmt.Errorf("Could not send header: %f", err)
 	}
@@ -87,7 +93,7 @@ func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string
 
 		// Send a message every 5 listings
 		if (i+1)%5 == 0 {
-			err = d.sendMessage(fields)
+			err = d.sendMessage(channelId, fields)
 			if err != nil {
 				return fmt.Errorf("Could not send message: %f", err)
 			}
@@ -97,7 +103,7 @@ func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string
 
 	// Ensure we send any remaining messages
 	if len(fields) != 0 {
-		err = d.sendMessage(fields)
+		err = d.sendMessage(channelId, fields)
 		if err != nil {
 			return fmt.Errorf("Could not send message: %f", err)
 		}
@@ -106,7 +112,7 @@ func (d *Discord) PostListings(listings *ffxiv.Listings, datacentre, duty string
 	return nil
 }
 
-func (d *Discord) sendMessage(fields []*discordgo.MessageEmbedField) error {
+func (d *Discord) sendMessage(channelId string, fields []*discordgo.MessageEmbedField) error {
 	embed := &discordgo.MessageEmbed{
 		Type:   discordgo.EmbedTypeRich,
 		Color:  0x6600ff,
@@ -118,7 +124,7 @@ func (d *Discord) sendMessage(fields []*discordgo.MessageEmbedField) error {
 	messageSend := &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{embed},
 	}
-	_, err := d.Session.ChannelMessageSendComplex(d.ChannelId, messageSend)
+	_, err := d.Session.ChannelMessageSendComplex(channelId, messageSend)
 	if err != nil {
 		return err
 	}

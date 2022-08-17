@@ -1,0 +1,20 @@
+channels:
+- id: "991199065196990585" # APD PF check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Aether]
+- id: "1009566968396922951" # NPS pf check 1
+  duty: "Asphodelos: The First Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal]
+- id: "1009567736650801293" # NPS pf check 2
+  duty: "Asphodelos: The Second Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal]
+- id: "1009568748438556832" # NPS pf check 3
+  duty: "Asphodelos: The Third Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal]
+- id: "1009568848636293250"  # NPS pf check 4p1
+  duty: "Asphodelos: The Fourth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal]
+- id: "1009568966194249872" # NPS pf check 4p2
+  duty: "Asphodelos: The Fourth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal]
+

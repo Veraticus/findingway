@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
 	"github.com/Veraticus/trappingway/internal/discord"
 	"github.com/Veraticus/trappingway/internal/scraper"
+
+	"gopkg.in/yaml.v2"
 )
 
 func main() {
@@ -14,32 +17,22 @@ func main() {
 	if !ok {
 		panic("You must supply a DISCORD_TOKEN to start!")
 	}
-
-	discordChannelId, ok := os.LookupEnv("DISCORD_CHANNEL_ID")
-	if !ok {
-		panic("You must supply a DISCORD_CHANNEL_ID to start!")
-	}
-
-	dataCentre, ok := os.LookupEnv("DATA_CENTRE")
-	if !ok {
-		panic("You must supply a DATA_CENTRE to start!")
-	}
-
-	duty, ok := os.LookupEnv("DUTY")
-	if !ok {
-		panic("You must supply a DUTY to start!")
-	}
-
 	once, ok := os.LookupEnv("ONCE")
 	if !ok {
 		once = "false"
 	}
 
 	discord := &discord.Discord{
-		Token:     discordToken,
-		ChannelId: discordChannelId,
+		Token: discordToken,
 	}
-	err := discord.Start()
+
+	config, err := ioutil.ReadFile("./config.yaml")
+	if err != nil {
+		panic(fmt.Errorf("Could not read config.yaml: %w", err))
+	}
+	yaml.Unmarshal(config, &discord)
+
+	err = discord.Start()
 	defer discord.Session.Close()
 	if err != nil {
 		panic(fmt.Errorf("Could not instantiate Discord: %f", err))
@@ -56,20 +49,22 @@ func main() {
 			continue
 		}
 
-		fmt.Printf("Cleaning Discord...\n")
-		err = discord.CleanChannel()
-		if err != nil {
-			fmt.Printf("Discord error cleaning channel: %f\n", err)
-		}
+		for _, channel := range discord.Channels {
+			fmt.Printf("Cleaning Discord for %v...\n", channel.Duty)
+			err = discord.CleanChannel(channel.ID)
+			if err != nil {
+				fmt.Printf("Discord error cleaning channel: %f\n", err)
+			}
 
-		fmt.Printf("Updating Discord...\n")
-		err = discord.PostListings(scraper.Listings, dataCentre, duty)
-		if err != nil {
-			fmt.Printf("Discord error updating messagea: %f\n", err)
-		}
+			fmt.Printf("Updating Discord for %v...\n", channel.Duty)
+			err = discord.PostListings(channel.ID, scraper.Listings, channel.Duty, channel.DataCentres)
+			if err != nil {
+				fmt.Printf("Discord error updating messagea: %f\n", err)
+			}
 
-		if once != "false" {
-			os.Exit(0)
+			if once != "false" {
+				os.Exit(0)
+			}
 		}
 		time.Sleep(3 * time.Minute)
 	}

@@ -6,15 +6,11 @@ Trappingway scrapes https://xivpf.com/listings every 3 minutes, collects the res
 
 ## Running
 
-Trappingway requires four environment variables to start:
+Trappingway ingests its configuration file at `./config.yaml` to determine what to parse.
+
+Trappingway requires one environment variable to start:
 
 * **DISCORD_TOKEN**: You have to create a [Discord bot for Trappingway](https://discord.com/developers/applications). Once you've done so, you can add the bot token here.
-
-* **DISCORD_CHANNEL_ID**: You must create a Discord channel that Trappingway will manage; be aware it will delete all messages on this channel and replace them, so don't choose a channel whose message history you care about. Add the channel's ID here.
-
-* **DATA_CENTRE**: Which data centre to filter duties to.
-
-* **DUTY**: Which duty to filter on.
 
 Trapping also accepts one optional environment variable:
 

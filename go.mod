@@ -6,6 +6,7 @@ require (
 	github.com/bwmarrin/discordgo v0.25.0
 	github.com/gocolly/colly v1.2.0
 	github.com/stretchr/testify v1.7.4
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
