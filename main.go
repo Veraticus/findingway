@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/Veraticus/trappingway/internal/discord"
@@ -22,7 +23,7 @@ func main() {
 		once = "false"
 	}
 
-	discord := &discord.Discord{
+	d := &discord.Discord{
 		Token: discordToken,
 	}
 
@@ -30,10 +31,10 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("Could not read config.yaml: %w", err))
 	}
-	yaml.Unmarshal(config, &discord)
+	yaml.Unmarshal(config, &d)
 
-	err = discord.Start()
-	defer discord.Session.Close()
+	err = d.Start()
+	defer d.Session.Close()
 	if err != nil {
 		panic(fmt.Errorf("Could not instantiate Discord: %f", err))
 	}
@@ -49,19 +50,24 @@ func main() {
 			continue
 		}
 
-		for _, channel := range discord.Channels {
-			fmt.Printf("Cleaning Discord for %v...\n", channel.Duty)
-			err = discord.CleanChannel(channel.ID)
-			if err != nil {
-				fmt.Printf("Discord error cleaning channel: %f\n", err)
-			}
+		var wg sync.WaitGroup
+		for _, channel := range d.Channels {
+			wg.Add(1)
+			go func(c *discord.Channel) {
+				fmt.Printf("Cleaning Discord for %v...\n", c.Duty)
+				err = d.CleanChannel(c.ID)
+				if err != nil {
+					fmt.Printf("Discord error cleaning channel: %f\n", err)
+				}
 
-			fmt.Printf("Updating Discord for %v...\n", channel.Duty)
-			err = discord.PostListings(channel.ID, scraper.Listings, channel.Duty, channel.DataCentres)
-			if err != nil {
-				fmt.Printf("Discord error updating messagea: %f\n", err)
-			}
+				fmt.Printf("Updating Discord for %v...\n", c.Duty)
+				err = d.PostListings(c.ID, scraper.Listings, c.Duty, c.DataCentres)
+				if err != nil {
+					fmt.Printf("Discord error updating messagea: %f\n", err)
+				}
+			}(channel)
 		}
+		wg.Wait()
 		if once != "false" {
 			os.Exit(0)
 		}
