@@ -1,7 +1,11 @@
 package ffxiv
 
 import (
+	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type Listings struct {
@@ -35,14 +39,14 @@ func NewSlot() *Slot {
 	}
 }
 
-func (ls *Listings) ForDutyAndDataCentres(duty string, dataCentres []string) []*Listing {
-	listings := []*Listing{}
+func (ls *Listings) ForDutyAndDataCentres(duty string, dataCentres []string) *Listings {
+	listings := &Listings{Listings: []*Listing{}}
 
 	for _, l := range ls.Listings {
 		if l.Duty == duty {
 			for _, dataCentre := range dataCentres {
 				if l.DataCentre == dataCentre {
-					listings = append(listings, l)
+					listings.Listings = append(listings.Listings, l)
 				}
 			}
 		}
@@ -50,6 +54,15 @@ func (ls *Listings) ForDutyAndDataCentres(duty string, dataCentres []string) []*
 
 	return listings
 }
+
+// func (ls *Listings) LatestUpdateTime() time.Time {
+//   var lastUpdateTime time.Time
+
+//   for _, l := range ls.Listings {
+
+//   }
+
+// }
 
 func (ls *Listings) Add(l *Listing) {
 	for _, existingListing := range ls.Listings {
@@ -93,4 +106,100 @@ func (l *Listing) GetTags() string {
 
 func (l *Listing) GetDescription() string {
 	return "```" + l.Description + "```"
+}
+
+var expiresSecondsRegexp = regexp.MustCompile(`in (\d+) seconds`)
+var expiresMinutesRegexp = regexp.MustCompile(`in (\d+) minutes`)
+var expiresHoursRegexp = regexp.MustCompile(`in (\d+) hours`)
+
+func (l *Listing) ExpiresAt() (time.Time, error) {
+	now := time.Now()
+	if l.Expires == "in a second" {
+		return now.Add(time.Duration(1) * time.Second), nil
+	}
+
+	if l.Expires == "in a minute" {
+		return now.Add(time.Duration(1) * time.Minute), nil
+	}
+
+	if l.Expires == "in an hour" {
+		return now.Add(time.Duration(1) * time.Hour), nil
+	}
+
+	match := expiresSecondsRegexp.FindStringSubmatch(l.Expires)
+	if len(match) != 0 {
+		seconds, err := strconv.Atoi(match[1])
+		if err != nil {
+			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+		}
+		return now.Add(time.Duration(seconds) * time.Second), nil
+	}
+
+	match = expiresMinutesRegexp.FindStringSubmatch(l.Expires)
+	if len(match) != 0 {
+		minutes, err := strconv.Atoi(match[1])
+		if err != nil {
+			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+		}
+		return now.Add(time.Duration(minutes) * time.Minute), nil
+	}
+
+	match = expiresHoursRegexp.FindStringSubmatch(l.Expires)
+	if len(match) != 0 {
+		hours, err := strconv.Atoi(match[1])
+		if err != nil {
+			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+		}
+		return now.Add(time.Duration(hours) * time.Hour), nil
+	}
+
+	return now, fmt.Errorf("Failed to parse time %v", l.Expires)
+}
+
+var updatedSecondsRegexp = regexp.MustCompile(`(\d+) seconds ago`)
+var updatedMinutesRegexp = regexp.MustCompile(`(\d+) minutes ago`)
+var updatedHoursRegexp = regexp.MustCompile(`(\d+) hours ago`)
+
+func (l *Listing) UpdatedAt() (time.Time, error) {
+	now := time.Now()
+	if l.Updated == "a second ago" {
+		return now.Add(time.Duration(-1) * time.Second), nil
+	}
+
+	if l.Updated == "a minute ago" {
+		return now.Add(time.Duration(-1) * time.Minute), nil
+	}
+
+	if l.Updated == "an hour ago" {
+		return now.Add(time.Duration(-1) * time.Hour), nil
+	}
+
+	match := updatedSecondsRegexp.FindStringSubmatch(l.Updated)
+	if len(match) != 0 {
+		seconds, err := strconv.Atoi(match[1])
+		if err != nil {
+			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+		}
+		return now.Add(time.Duration(-seconds) * time.Second), nil
+	}
+
+	match = updatedMinutesRegexp.FindStringSubmatch(l.Updated)
+	if len(match) != 0 {
+		minutes, err := strconv.Atoi(match[1])
+		if err != nil {
+			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+		}
+		return now.Add(time.Duration(-minutes) * time.Minute), nil
+	}
+
+	match = updatedHoursRegexp.FindStringSubmatch(l.Updated)
+	if len(match) != 0 {
+		hours, err := strconv.Atoi(match[1])
+		if err != nil {
+			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+		}
+		return now.Add(time.Duration(-hours) * time.Hour), nil
+	}
+
+	return now, fmt.Errorf("Failed to parse time %v", l.Updated)
 }

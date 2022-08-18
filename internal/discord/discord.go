@@ -60,7 +60,7 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 		Title:       fmt.Sprintf("%s PFs", duty),
 		Type:        discordgo.EmbedTypeRich,
 		Color:       0x6600ff,
-		Description: fmt.Sprintf("Found %v listings %v", len(scopedListings), fmt.Sprintf("<t:%v:R>", time.Now().Unix())),
+		Description: fmt.Sprintf("Found %v listings %v", len(scopedListings.Listings), fmt.Sprintf("<t:%v:R>", time.Now().Unix())),
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: strings.Repeat("\u3000", 20),
 		},
@@ -74,7 +74,7 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 	}
 
 	fields := []*discordgo.MessageEmbedField{}
-	for i, listing := range scopedListings {
+	for i, listing := range scopedListings.Listings {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   listing.Creator,
 			Value:  listing.PartyDisplay(),
