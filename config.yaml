@@ -11,10 +11,7 @@ channels:
 - id: "1009568748438556832" # NPS pf check 3
   duty: "Asphodelos: The Third Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal]
-- id: "1009568848636293250"  # NPS pf check 4p1
-  duty: "Asphodelos: The Fourth Circle (Savage)"
-  dataCentres: [Aether, Crystal, Primal]
-- id: "1009568966194249872" # NPS pf check 4p2
+- id: "1009568848636293250"  # NPS pf check 4
   duty: "Asphodelos: The Fourth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal]
 - id: "1003797164222337094" # UPR ucob pf check
