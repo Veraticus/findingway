@@ -17,12 +17,6 @@ channels:
 - id: "1009568966194249872" # NPS pf check 4p2
   duty: "Asphodelos: The Fourth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal]
-- id: "1009568966194249872" # NPS pf check 4p2
-  duty: "Asphodelos: The Fourth Circle (Savage)"
-  dataCentres: [Aether, Crystal, Primal]
-- id: "1009568966194249872" # NPS pf check 4p2
-  duty: "Asphodelos: The Fourth Circle (Savage)"
-  dataCentres: [Aether, Crystal, Primal]
 - id: "1003797164222337094" # UPR ucob pf check
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Primal]
