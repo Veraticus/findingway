@@ -17,4 +17,21 @@ channels:
 - id: "1009568966194249872" # NPS pf check 4p2
   duty: "Asphodelos: The Fourth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal]
-
+- id: "1009568966194249872" # NPS pf check 4p2
+  duty: "Asphodelos: The Fourth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal]
+- id: "1009568966194249872" # NPS pf check 4p2
+  duty: "Asphodelos: The Fourth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal]
+- id: "1003797164222337094" # UPR ucob pf check
+  duty: "The Unending Coil of Bahamut (Ultimate)"
+  dataCentres: [Primal]
+- id: "1003797182639525899" # UPR uwu pf check
+  duty: "The Weapon's Refrain (Ultimate)"
+  dataCentres: [Primal]
+- id: "1003797201895571508" # UPR tea pf check
+  duty: "The Epic of Alexander (Ultimate)"
+  dataCentres: [Primal]
+- id: "1003797214491066498" # UPR dsr pf check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Primal]
