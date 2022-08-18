@@ -35,7 +35,7 @@ func TestGetListings(t *testing.T) {
 	s := New(ts.URL)
 	s.Scrape()
 
-	assert.Equal(t, 677, len(s.Listings.Listings))
+	assert.Equal(t, 650, len(s.Listings.Listings))
 
 	listing := s.Listings.Listings[100]
 	assert.Equal(t, listing.Duty, "The Unending Coil of Bahamut (Ultimate)")
