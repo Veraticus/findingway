@@ -56,11 +56,26 @@ func (d *Discord) CleanChannel(channelId string) error {
 func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty string, dataCentres []string) error {
 	scopedListings := listings.ForDutyAndDataCentres(duty, dataCentres)
 
+	mostRecent, err := scopedListings.MostRecentUpdated()
+	if err != nil {
+		return fmt.Errorf("Could not find most recently updated duty: %w", err)
+	}
+	mostRecentUpdated, err := mostRecent.UpdatedAt()
+	if err != nil {
+		return fmt.Errorf("Could not find most recently updatedAt: %w", err)
+	}
+	if mostRecentUpdated.After(time.Now().Add(-4 * time.Minute)) {
+		scopedListings, err = scopedListings.UpdatedWithinLast(4 * time.Minute)
+		if err != nil {
+			return fmt.Errorf("Could not find most recently listings: %w", err)
+		}
+	}
+
 	headerEmbed := &discordgo.MessageEmbed{
 		Title:       fmt.Sprintf("%s PFs", duty),
 		Type:        discordgo.EmbedTypeRich,
 		Color:       0x6600ff,
-		Description: fmt.Sprintf("Found %v listings %v", len(scopedListings), fmt.Sprintf("<t:%v:R>", time.Now().Unix())),
+		Description: fmt.Sprintf("Found %v listings %v", len(scopedListings.Listings), fmt.Sprintf("<t:%v:R>", time.Now().Unix())),
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: strings.Repeat("\u3000", 20),
 		},
@@ -68,13 +83,13 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 	headerMessageSend := &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{headerEmbed},
 	}
-	_, err := d.Session.ChannelMessageSendComplex(channelId, headerMessageSend)
+	_, err = d.Session.ChannelMessageSendComplex(channelId, headerMessageSend)
 	if err != nil {
-		return fmt.Errorf("Could not send header: %f", err)
+		return fmt.Errorf("Could not send header: %w", err)
 	}
 
 	fields := []*discordgo.MessageEmbedField{}
-	for i, listing := range scopedListings {
+	for i, listing := range scopedListings.Listings {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   listing.Creator,
 			Value:  listing.PartyDisplay(),
@@ -95,7 +110,7 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 		if (i+1)%5 == 0 {
 			err = d.sendMessage(channelId, fields)
 			if err != nil {
-				return fmt.Errorf("Could not send message: %f", err)
+				return fmt.Errorf("Could not send message: %w", err)
 			}
 			fields = []*discordgo.MessageEmbedField{}
 		}
@@ -105,7 +120,7 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 	if len(fields) != 0 {
 		err = d.sendMessage(channelId, fields)
 		if err != nil {
-			return fmt.Errorf("Could not send message: %f", err)
+			return fmt.Errorf("Could not send message: %w", err)
 		}
 	}
 
