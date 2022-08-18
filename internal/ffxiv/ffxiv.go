@@ -55,14 +55,40 @@ func (ls *Listings) ForDutyAndDataCentres(duty string, dataCentres []string) *Li
 	return listings
 }
 
-// func (ls *Listings) LatestUpdateTime() time.Time {
-//   var lastUpdateTime time.Time
+func (ls *Listings) MostRecentUpdated() (*Listing, error) {
+	var mostRecentUpdated time.Time
+	var mostRecent *Listing
 
-//   for _, l := range ls.Listings {
+	for _, l := range ls.Listings {
+		updatedAt, err := l.UpdatedAt()
+		if err != nil {
+			return nil, fmt.Errorf("Could not find most recent update time: %w", err)
+		}
+		if updatedAt.After(mostRecentUpdated) {
+			mostRecentUpdated = updatedAt
+			mostRecent = l
+		}
+	}
 
-//   }
+	return mostRecent, nil
+}
 
-// }
+func (ls *Listings) UpdatedWithinLast(duration time.Duration) (*Listings, error) {
+	listings := &Listings{Listings: []*Listing{}}
+	now := time.Now()
+
+	for _, l := range ls.Listings {
+		updatedAt, err := l.UpdatedAt()
+		if err != nil {
+			return nil, fmt.Errorf("Could not find most recent update time: %w", err)
+		}
+		if now.Add(-duration).Before(updatedAt) {
+			listings.Listings = append(listings.Listings, l)
+		}
+	}
+
+	return listings, nil
+}
 
 func (ls *Listings) Add(l *Listing) {
 	for _, existingListing := range ls.Listings {
@@ -114,6 +140,11 @@ var expiresHoursRegexp = regexp.MustCompile(`in (\d+) hours`)
 
 func (l *Listing) ExpiresAt() (time.Time, error) {
 	now := time.Now()
+
+	if l.Expires == "now" {
+		return now, nil
+	}
+
 	if l.Expires == "in a second" {
 		return now.Add(time.Duration(1) * time.Second), nil
 	}
@@ -162,6 +193,11 @@ var updatedHoursRegexp = regexp.MustCompile(`(\d+) hours ago`)
 
 func (l *Listing) UpdatedAt() (time.Time, error) {
 	now := time.Now()
+
+	if l.Updated == "now" {
+		return now, nil
+	}
+
 	if l.Updated == "a second ago" {
 		return now.Add(time.Duration(-1) * time.Second), nil
 	}

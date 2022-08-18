@@ -65,6 +65,7 @@ func main() {
 				if err != nil {
 					fmt.Printf("Discord error updating messagea: %f\n", err)
 				}
+				wg.Done()
 			}(channel)
 		}
 		wg.Wait()
