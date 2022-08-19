@@ -141,6 +141,10 @@ var expiresHoursRegexp = regexp.MustCompile(`in (\d+) hours`)
 func (l *Listing) ExpiresAt() (time.Time, error) {
 	now := time.Now()
 
+	if l.Expires == "" {
+		return now, nil
+	}
+
 	if l.Expires == "now" {
 		return now, nil
 	}
@@ -193,6 +197,10 @@ var updatedHoursRegexp = regexp.MustCompile(`(\d+) hours ago`)
 
 func (l *Listing) UpdatedAt() (time.Time, error) {
 	now := time.Now()
+
+	if l.Updated == "" {
+		return now, nil
+	}
 
 	if l.Updated == "now" {
 		return now, nil

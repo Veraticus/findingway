@@ -60,14 +60,16 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 	if err != nil {
 		return fmt.Errorf("Could not find most recently updated duty: %w", err)
 	}
-	mostRecentUpdated, err := mostRecent.UpdatedAt()
-	if err != nil {
-		return fmt.Errorf("Could not find most recently updatedAt: %w", err)
-	}
-	if mostRecentUpdated.After(time.Now().Add(-4 * time.Minute)) {
-		scopedListings, err = scopedListings.UpdatedWithinLast(4 * time.Minute)
+	if mostRecent != nil {
+		mostRecentUpdated, err := mostRecent.UpdatedAt()
 		if err != nil {
-			return fmt.Errorf("Could not find most recently listings: %w", err)
+			return fmt.Errorf("Could not find most recently updatedAt: %w", err)
+		}
+		if mostRecentUpdated.After(time.Now().Add(-4 * time.Minute)) {
+			scopedListings, err = scopedListings.UpdatedWithinLast(4 * time.Minute)
+			if err != nil {
+				return fmt.Errorf("Could not find most recently listings: %w", err)
+			}
 		}
 	}
 
