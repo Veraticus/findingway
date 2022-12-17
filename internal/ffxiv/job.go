@@ -114,7 +114,7 @@ func (j Job) Emoji() string {
 	case MRD:
 		return "<:MRD:991374313108291624>"
 	case SCH:
-		return "<:SCH:991374308796530848>"
+		return "<:SCH:1053569722609840139>"
 	case ACN:
 		return "<:ACN:991374307328544879>"
 	case SGE:

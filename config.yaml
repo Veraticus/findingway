@@ -1,41 +1,4 @@
 channels:
-- id: "991199065196990585" # APD PF check
-  duty: "Dragonsong's Reprise (Ultimate)"
-  dataCentres: [Aether]
-- id: "1009566968396922951" # NPS pf check 1
-  duty: "Abyssos: The Fifth Circle (Savage)"
-  dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1009567736650801293" # NPS pf check 2
-  duty: "Abyssos: The Sixth Circle (Savage)"
-  dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1009568748438556832" # NPS pf check 3
-  duty: "Abyssos: The Seventh Circle (Savage)"
-  dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1009568848636293250"  # NPS pf check 4
-  duty: "Abyssos: The Eighth Circle (Savage)"
-  dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1003797164222337094" # UPR ucob pf check
-  duty: "The Unending Coil of Bahamut (Ultimate)"
-  dataCentres: [Primal]
-- id: "1003797182639525899" # UPR uwu pf check
-  duty: "The Weapon's Refrain (Ultimate)"
-  dataCentres: [Primal]
-- id: "1003797201895571508" # UPR tea pf check
-  duty: "The Epic of Alexander (Ultimate)"
-  dataCentres: [Primal]
-- id: "1003797214491066498" # UPR dsr pf check
-  duty: "Dragonsong's Reprise (Ultimate)"
-  dataCentres: [Primal]
-- id: "1037081516523651132" # UDR ucob pf check
-  duty: "The Unending Coil of Bahamut (Ultimate)"
-  dataCentres: [Dynamis]
-- id: "1037081529366630451" # UDR uwu pf check
-  duty: "The Weapon's Refrain (Ultimate)"
-  dataCentres: [Dynamis]
-- id: "1037081703283433502" # UDR tea pf check
-  duty: "The Epic of Alexander (Ultimate)"
-  dataCentres: [Dynamis]
-- id: "1037081714683547718" # UDR dsr pf check
-  duty: "Dragonsong's Reprise (Ultimate)"
-  dataCentres: [Dynamis]
-
+  - id: "1053568610762756186"
+    duty: "The Weapon's Refrain (Ultimate)"
+    dataCentres: [Materia, Aether]

@@ -39,55 +39,19 @@ func NewSlot() *Slot {
 	}
 }
 
-func (ls *Listings) ForDutyAndDataCentres(duty string, dataCentres []string) *Listings {
+func (ls *Listings) FilterListingsForDutyAndDc(duty string, datacentres []string) *Listings {
 	listings := &Listings{Listings: []*Listing{}}
 
 	for _, l := range ls.Listings {
-		if l.Duty == duty {
-			for _, dataCentre := range dataCentres {
-				if l.DataCentre == dataCentre {
-					listings.Listings = append(listings.Listings, l)
-				}
+		// Filter over the DC first to remove most of the entries
+		for _, dc := range datacentres {
+			if dc == l.DataCentre && l.Duty == duty {
+				listings.Add(l)
 			}
 		}
 	}
 
 	return listings
-}
-
-func (ls *Listings) MostRecentUpdated() (*Listing, error) {
-	var mostRecentUpdated time.Time
-	var mostRecent *Listing
-
-	for _, l := range ls.Listings {
-		updatedAt, err := l.UpdatedAt()
-		if err != nil {
-			return nil, fmt.Errorf("Could not find most recent update time: %w", err)
-		}
-		if updatedAt.After(mostRecentUpdated) {
-			mostRecentUpdated = updatedAt
-			mostRecent = l
-		}
-	}
-
-	return mostRecent, nil
-}
-
-func (ls *Listings) UpdatedWithinLast(duration time.Duration) (*Listings, error) {
-	listings := &Listings{Listings: []*Listing{}}
-	now := time.Now()
-
-	for _, l := range ls.Listings {
-		updatedAt, err := l.UpdatedAt()
-		if err != nil {
-			return nil, fmt.Errorf("Could not find most recent update time: %w", err)
-		}
-		if now.Add(-duration).Before(updatedAt) {
-			listings.Listings = append(listings.Listings, l)
-		}
-	}
-
-	return listings, nil
 }
 
 func (ls *Listings) Add(l *Listing) {
@@ -165,7 +129,7 @@ func (l *Listing) ExpiresAt() (time.Time, error) {
 	if len(match) != 0 {
 		seconds, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Expires, err)
 		}
 		return now.Add(time.Duration(seconds) * time.Second), nil
 	}
@@ -174,7 +138,7 @@ func (l *Listing) ExpiresAt() (time.Time, error) {
 	if len(match) != 0 {
 		minutes, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Expires, err)
 		}
 		return now.Add(time.Duration(minutes) * time.Minute), nil
 	}
@@ -183,12 +147,12 @@ func (l *Listing) ExpiresAt() (time.Time, error) {
 	if len(match) != 0 {
 		hours, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Expires, err)
 		}
 		return now.Add(time.Duration(hours) * time.Hour), nil
 	}
 
-	return now, fmt.Errorf("Failed to parse time %v", l.Expires)
+	return now, fmt.Errorf("failed to parse time %v", l.Expires)
 }
 
 var updatedSecondsRegexp = regexp.MustCompile(`(\d+) seconds ago`)
@@ -222,7 +186,7 @@ func (l *Listing) UpdatedAt() (time.Time, error) {
 	if len(match) != 0 {
 		seconds, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Updated, err)
 		}
 		return now.Add(time.Duration(-seconds) * time.Second), nil
 	}
@@ -231,7 +195,7 @@ func (l *Listing) UpdatedAt() (time.Time, error) {
 	if len(match) != 0 {
 		minutes, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Updated, err)
 		}
 		return now.Add(time.Duration(-minutes) * time.Minute), nil
 	}
@@ -240,10 +204,10 @@ func (l *Listing) UpdatedAt() (time.Time, error) {
 	if len(match) != 0 {
 		hours, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Updated, err)
 		}
 		return now.Add(time.Duration(-hours) * time.Hour), nil
 	}
 
-	return now, fmt.Errorf("Failed to parse time %v", l.Updated)
+	return now, fmt.Errorf("failed to parse time %v", l.Updated)
 }

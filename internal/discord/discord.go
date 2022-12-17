@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -11,9 +12,8 @@ import (
 )
 
 type Discord struct {
-	Token string
-
-	Session  *discordgo.Session
+	Token    string
+	session  *discordgo.Session
 	Channels []*Channel `yaml:"channels"`
 }
 
@@ -25,28 +25,41 @@ type Channel struct {
 
 func (d *Discord) Start() error {
 	s, err := discordgo.New("Bot " + d.Token)
+
 	if err != nil {
-		return fmt.Errorf("Could not start Discord: %f", err)
+		return fmt.Errorf("could not start Discord: %f", err)
 	}
 
 	err = s.Open()
+
 	if err != nil {
-		return fmt.Errorf("Could not open Discord session: %f", err)
+		return fmt.Errorf("could not open Discord session: %f", err)
 	}
 
-	d.Session = s
+	d.session = s
 	return nil
 }
 
-func (d *Discord) CleanChannel(channelId string) error {
-	messages, err := d.Session.ChannelMessages(channelId, 100, "", "", "")
+func (d *Discord) Close() {
+	err := d.session.Close()
+
 	if err != nil {
-		return fmt.Errorf("Could not list messages: %f", err)
+		log.Printf("could not close websocket session: %f\n", err)
 	}
+}
+
+func (d *Discord) CleanChannel(channelId string) error {
+	messages, err := d.session.ChannelMessages(channelId, 100, "", "", "")
+
+	if err != nil {
+		return fmt.Errorf("could not list messages: %f", err)
+	}
+
 	for _, message := range messages {
-		err := d.Session.ChannelMessageDelete(channelId, message.ID)
+		err := d.session.ChannelMessageDelete(channelId, message.ID)
+
 		if err != nil {
-			return fmt.Errorf("Could not delete message %+v: %f", message, err)
+			return fmt.Errorf("could not delete message %+v: %f", message, err)
 		}
 	}
 
@@ -54,24 +67,7 @@ func (d *Discord) CleanChannel(channelId string) error {
 }
 
 func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty string, dataCentres []string) error {
-	scopedListings := listings.ForDutyAndDataCentres(duty, dataCentres)
-
-	mostRecent, err := scopedListings.MostRecentUpdated()
-	if err != nil {
-		return fmt.Errorf("Could not find most recently updated duty: %w", err)
-	}
-	if mostRecent != nil {
-		mostRecentUpdated, err := mostRecent.UpdatedAt()
-		if err != nil {
-			return fmt.Errorf("Could not find most recently updatedAt: %w", err)
-		}
-		if mostRecentUpdated.After(time.Now().Add(-4 * time.Minute)) {
-			scopedListings, err = scopedListings.UpdatedWithinLast(4 * time.Minute)
-			if err != nil {
-				return fmt.Errorf("Could not find most recently listings: %w", err)
-			}
-		}
-	}
+	scopedListings := listings.FilterListingsForDutyAndDc(duty, dataCentres)
 
 	headerEmbed := &discordgo.MessageEmbed{
 		Title:       fmt.Sprintf("%s PFs", duty),
@@ -82,15 +78,19 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 			Text: strings.Repeat("\u3000", 20),
 		},
 	}
+
 	headerMessageSend := &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{headerEmbed},
 	}
-	_, err = d.Session.ChannelMessageSendComplex(channelId, headerMessageSend)
+
+	_, err := d.session.ChannelMessageSendComplex(channelId, headerMessageSend)
+
 	if err != nil {
-		return fmt.Errorf("Could not send header: %w", err)
+		return fmt.Errorf("could not send header: %w", err)
 	}
 
 	fields := []*discordgo.MessageEmbedField{}
+
 	for i, listing := range scopedListings.Listings {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   listing.Creator,
@@ -111,9 +111,11 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 		// Send a message every 5 listings
 		if (i+1)%5 == 0 {
 			err = d.sendMessage(channelId, fields)
+
 			if err != nil {
-				return fmt.Errorf("Could not send message: %w", err)
+				return fmt.Errorf("could not send message: %w", err)
 			}
+
 			fields = []*discordgo.MessageEmbedField{}
 		}
 	}
@@ -121,8 +123,9 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 	// Ensure we send any remaining messages
 	if len(fields) != 0 {
 		err = d.sendMessage(channelId, fields)
+
 		if err != nil {
-			return fmt.Errorf("Could not send message: %w", err)
+			return fmt.Errorf("could not send message: %w", err)
 		}
 	}
 
@@ -138,10 +141,13 @@ func (d *Discord) sendMessage(channelId string, fields []*discordgo.MessageEmbed
 			Text: strings.Repeat("\u3000", 20),
 		},
 	}
+
 	messageSend := &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{embed},
 	}
-	_, err := d.Session.ChannelMessageSendComplex(channelId, messageSend)
+
+	_, err := d.session.ChannelMessageSendComplex(channelId, messageSend)
+
 	if err != nil {
 		return err
 	}

@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
+	"log"
 	"os"
 	"sync"
 	"time"
@@ -14,66 +13,103 @@ import (
 )
 
 func main() {
-	discordToken, ok := os.LookupEnv("DISCORD_TOKEN")
-	if !ok {
-		panic("You must supply a DISCORD_TOKEN to start!")
-	}
-	once, ok := os.LookupEnv("ONCE")
-	if !ok {
-		once = "false"
+	os.Exit(run())
+}
+
+func run() int {
+	var token string
+	once := false
+
+	for i := 1; i < len(os.Args); i++ {
+		arg := string(os.Args[i])
+		switch arg {
+		default:
+			{
+				log.Printf("Unknown option '%s'", arg)
+			}
+		case "--once":
+			{
+				once = true
+			}
+		case "--token":
+			{
+				if i+1 >= len(os.Args) {
+					log.Println("please specify the token string")
+					os.Exit(1)
+				}
+				i++
+				token = string(os.Args[i])
+			}
+		}
 	}
 
-	d := &discord.Discord{
-		Token: discordToken,
+	server := &discord.Discord{
+		Token: token,
 	}
 
-	config, err := ioutil.ReadFile("./config.yaml")
+	config, err := os.ReadFile("./config.yaml")
+
 	if err != nil {
-		panic(fmt.Errorf("Could not read config.yaml: %w", err))
+		log.Printf("Could not read config.yaml: %s\n", err)
+		return 1
 	}
-	yaml.Unmarshal(config, &d)
 
-	err = d.Start()
-	defer d.Session.Close()
+	err = yaml.Unmarshal(config, &server)
+
 	if err != nil {
-		panic(fmt.Errorf("Could not instantiate Discord: %f", err))
+		log.Printf("Bad config.yaml: %s\n", err)
+		return 1
 	}
 
-	scraper := scraper.New("https://xivpf.com")
+	err = server.Start()
+	defer server.Close()
 
-	fmt.Printf("Starting Trappingway...\n")
+	if err != nil {
+		log.Printf("Could not instantiate Discord: %s\n", err)
+		return 1
+	}
+
+	scraper := scraper.New("https://xivpf.com/listings")
+
+	log.Printf("Starting Trappingway...\n")
 	for {
-		fmt.Printf("Scraping source...\n")
+		log.Printf("Scraping source...\n")
+
 		err := scraper.Scrape()
+
 		if err != nil {
-			fmt.Printf("Scraper error: %f\n", err)
-			continue
+			log.Printf("Scraper error: %f\n", err)
+			return 1
 		}
 
 		var wg sync.WaitGroup
-		for _, channel := range d.Channels {
+		for _, channel := range server.Channels {
 			wg.Add(1)
+
 			go func(c *discord.Channel) {
-				fmt.Printf("Cleaning Discord for %v...\n", c.Duty)
-				err = d.CleanChannel(c.ID)
+				log.Printf("Cleaning Discord for %v...\n", c.Duty)
+				err = server.CleanChannel(c.ID)
+
 				if err != nil {
-					fmt.Printf("Discord error cleaning channel: %f\n", err)
+					log.Printf("Error cleaning channel: %#v\n", err)
 				}
 
-				fmt.Printf("Updating Discord for %v...\n", c.Duty)
-				err = d.PostListings(c.ID, scraper.Listings, c.Duty, c.DataCentres)
+				log.Printf("Updating Discord for %v...\n", c.Duty)
+				err = server.PostListings(c.ID, scraper.Listings, c.Duty, c.DataCentres)
+
 				if err != nil {
-					fmt.Printf("Discord error updating messagea: %f\n", err)
+					log.Printf("Discord error updating message: %#v\n", err)
 				}
+
 				wg.Done()
 			}(channel)
 		}
 		wg.Wait()
-		if once != "false" {
-			os.Exit(0)
+
+		if once {
+			return 0
 		}
 
 		time.Sleep(3 * time.Minute)
 	}
-
 }

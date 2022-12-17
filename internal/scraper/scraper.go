@@ -72,7 +72,7 @@ func (s *Scraper) Scrape() error {
 		listings.Add(listing)
 	})
 
-	c.Visit(s.Url + "/listings")
+	c.Visit(s.Url)
 
 	s.Listings = listings
 
