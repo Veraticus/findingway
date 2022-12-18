@@ -18,7 +18,6 @@ func main() {
 }
 
 func run() int {
-	log.Println("Starting trappingway-go by Yuyuri Yuri!")
 	var sleep int64 = 3
 	once := false
 
@@ -115,7 +114,6 @@ func run() int {
 		if !first {
 			time.Sleep(time.Duration(sleep * int64(time.Minute)))
 		}
-		log.Println("Starting job...")
 
 		first = false
 		err := scraper.Scrape()
@@ -129,8 +127,6 @@ func run() int {
 			}
 		}
 
-		log.Println("Scraping successfull...")
-
 		err = server.CleanChannel()
 
 		if err != nil {
@@ -141,8 +137,6 @@ func run() int {
 				continue
 			}
 		}
-
-		log.Println("Clean channel...")
 
 		emojis, err := session.GuildEmojis(server.GuildId)
 
@@ -166,6 +160,6 @@ func run() int {
 			}
 		}
 
-		log.Println("Posted listing...")
+		log.Println("updated listing")
 	}
 }

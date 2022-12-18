@@ -4,12 +4,20 @@ Bot for Materia Ultimate Raid (MUR) discord server.
 
 ## Usage
 
-Please look at the provided `config.example.yaml` for the list of required configuration.
-They are hopefully self-explanatory.
-Aside from that, the server accepts some arguments:
+Every configuration is provided via the environment variable.
+This is not the most secure way to store secrets but leaking a discord token isn't that destructive I think?
+Anyways, you can run it by:
 
-1. `--sleep <X>` how many seconds to sleep before refreshing the channel
-2. `--config <path>` alternative path to the `config.yaml` file.
-   Defaults to a `config.yaml` in current working directory.
-3. `--once` causes the server to run the loop once and exits.
-   Mainly useful for debugging purposes.
+```shell
+export DISCORD_TOKEN=<discord bot token>
+export GUILD_ID=<guild ID to get emojis from>
+export CHANNEL_ID=<channel ID to write to>
+export WORLD=<world to look for>
+SLEEP=<how many minutes to sleep between job>
+go run cmd/main.go
+```
+
+It also accepts 1 command line argument,
+
+1. `--once`, which causes the server to run the loop once and exits.
+   Mainly useful for debugging purposes or setting this up as a job from a CRON.

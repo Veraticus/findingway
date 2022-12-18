@@ -1,9 +1,0 @@
-token: "token"
-world: "Materia or Aether or Element or whatever"
-channelId: "channelId" # Channel ID to write to
-guildId: "guildId" # Guild ID to get emojis from
-duties: # Duties to watch for
-  - "The Weapon's Refrain (Ultimate)"
-  - "The Unending Coil of Bahamut (Ultimate)"
-  - "The Epic of Alexander (Ultimate)"
-  - "Dragonsong's Reprise (Ultimate)"
