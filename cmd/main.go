@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"gopkg.in/yaml.v2"
 
 	murult "github.com/yuyuriyuri/murult"
 )
@@ -19,9 +18,8 @@ func main() {
 }
 
 func run() int {
-	configPath := "./config.yaml"
-	once := false
 	var sleep int64 = 3
+	once := false
 
 	for i := 1; i < len(os.Args); i++ {
 		arg := string(os.Args[i])
@@ -34,51 +32,51 @@ func run() int {
 			{
 				once = true
 			}
-		case "--config":
-			{
-				if i+1 >= len(os.Args) {
-					log.Println("please specify the token string")
-					os.Exit(1)
-				}
-				i++
-				configPath = string(os.Args[i])
-			}
-		case "--sleep":
-			{
-				if i+1 >= len(os.Args) {
-					log.Println("please specify the token string")
-					os.Exit(1)
-				}
-				i++
-				sleepStr := string(os.Args[i])
-				sleep64, err := strconv.ParseInt(sleepStr, 10, 64)
-
-				if err != nil {
-					log.Printf("bad input for --sleep: %s\n", err)
-					return 1
-				}
-
-				sleep = sleep64
-			}
 		}
 	}
 
-	configBytes, err := os.ReadFile(configPath)
+	token, tokenExists := os.LookupEnv("DISCORD_TOKEN")
 
-	if err != nil {
-		log.Printf("could not read config.yaml: %s\n", err)
+	if !tokenExists {
+		log.Printf("Please provide a discord token")
 		return 1
 	}
 
-	var config Config
-	err = yaml.Unmarshal(configBytes, &config)
+	guildId, guildIdExists := os.LookupEnv("GUILD_ID")
 
-	if err != nil {
-		log.Printf("failed to open config file: %s\n", err)
+	if !guildIdExists {
+		log.Printf("Please provide a guild ID to get emojis from")
 		return 1
 	}
 
-	session, err := discordgo.New("Bot " + config.Token)
+	channelId, channelIdExists := os.LookupEnv("CHANNEL_ID")
+
+	if !channelIdExists {
+		log.Printf("Please provide a channel ID to write to")
+		return 1
+	}
+
+	world, worldExists := os.LookupEnv("WORLD")
+
+	if !worldExists {
+		log.Printf("Please provide a world to filter for")
+		return 1
+	}
+
+	sleepStr, sleepEnvExists := os.LookupEnv("SLEEP")
+
+	if sleepEnvExists {
+		sleep64, err := strconv.ParseInt(sleepStr, 10, 64)
+
+		if err != nil {
+			log.Printf("bad input for --sleep: %s\n", err)
+			return 1
+		}
+
+		sleep = sleep64
+	}
+
+	session, err := discordgo.New("Bot " + token)
 
 	if err != nil {
 		log.Printf("could not start Discord: %s\n", err)
@@ -97,12 +95,16 @@ func run() int {
 
 	scraper := murult.NewScraper("https://xivpf.com/listings")
 	server := &murult.Server{
-		Token:     config.Token,
-		World:     config.World,
-		GuildId:   config.GuildId,
-		ChannelId: config.ChannelId,
+		Token:     token,
+		World:     world,
+		GuildId:   guildId,
+		ChannelId: channelId,
 		Session:   session,
-		Duties:    config.Duties,
+		Duties: []string{
+			"The Weapon's Refrain (Ultimate)",
+			"The Unending Coil of Bahamut (Ultimate)",
+			"The Epic of Alexander (Ultimate)",
+			"Dragonsong's Reprise (Ultimate)"},
 	}
 
 	first := true
@@ -157,18 +159,5 @@ func run() int {
 				continue
 			}
 		}
-
-		if once {
-			return 0
-		}
 	}
-}
-
-type Config struct {
-	Token     string            `yaml:"token"`
-	World     string            `yaml:"world"`
-	GuildId   string            `yaml:"guildId"`
-	ChannelId string            `yaml:"channelId"`
-	Duties    []string          `yaml:"duties"`
-	EmojiDb   map[string]string `yaml:"emojis"`
 }
