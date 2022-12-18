@@ -1,32 +1,30 @@
-package scraper
+package murult
 
 import (
 	"strings"
-
-	"github.com/Veraticus/trappingway/internal/ffxiv"
 
 	"github.com/gocolly/colly"
 )
 
 type Scraper struct {
 	Url      string
-	Listings *ffxiv.Listings
+	Listings *Listings
 }
 
-func New(url string) *Scraper {
+func NewScraper(url string) *Scraper {
 	return &Scraper{
 		Url:      url,
-		Listings: &ffxiv.Listings{Listings: []*ffxiv.Listing{}},
+		Listings: &Listings{Listings: []*Listing{}},
 	}
 }
 
 func (s *Scraper) Scrape() error {
-	listings := &ffxiv.Listings{}
+	listings := &Listings{}
 
 	c := colly.NewCollector()
 
 	c.OnHTML("#listings.list .listing", func(e *colly.HTMLElement) {
-		listing := &ffxiv.Listing{Party: []*ffxiv.Slot{}}
+		listing := &Listing{Party: []*Slot{}}
 
 		// We can unmarshal a fair amount of information
 		e.Unmarshal(listing)
@@ -42,28 +40,28 @@ func (s *Scraper) Scrape() error {
 
 		// Then the party list
 		e.ForEach(".party .slot", func(s int, p *colly.HTMLElement) {
-			slot := ffxiv.NewSlot()
+			slot := NewSlot()
 			class := p.Attr("class")
 
-			if strings.Contains(class, "dps") {
-				slot.Roles.Roles = append(slot.Roles.Roles, ffxiv.DPS)
+			if strings.Contains(class, "tank") {
+				slot.Roles.Tank = true
 			}
 
 			if strings.Contains(class, "healer") {
-				slot.Roles.Roles = append(slot.Roles.Roles, ffxiv.Healer)
+				slot.Roles.Healer = true
 			}
 
-			if strings.Contains(class, "tank") {
-				slot.Roles.Roles = append(slot.Roles.Roles, ffxiv.Tank)
+			if strings.Contains(class, "dps") {
+				slot.Roles.Dps = true
 			}
 
 			if strings.Contains(class, "empty") {
-				slot.Roles.Roles = append(slot.Roles.Roles, ffxiv.Empty)
+				slot.Roles.Empty = true
 			}
 
 			if strings.Contains(class, "filled") {
 				slot.Filled = true
-				slot.Job = ffxiv.JobFromAbbreviation(p.Attr("title"))
+				slot.Job = p.Attr("title")
 			}
 
 			listing.Party = append(listing.Party, slot)
@@ -72,7 +70,7 @@ func (s *Scraper) Scrape() error {
 		listings.Add(listing)
 	})
 
-	c.Visit(s.Url + "/listings")
+	c.Visit(s.Url)
 
 	s.Listings = listings
 

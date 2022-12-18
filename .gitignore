@@ -1,2 +1,6 @@
 coverage.out
 trappingway
+.vscode/
+config.yaml
+**/**.bin
+node_modules/
