@@ -1,4 +1,4 @@
-package ffxiv
+package murult
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 type Listings struct {
@@ -29,23 +31,28 @@ type Listing struct {
 
 type Slot struct {
 	Roles  Roles
-	Job    Job
+	Job    string
 	Filled bool
 }
 
 func NewSlot() *Slot {
 	return &Slot{
-		Roles: Roles{Roles: []Role{}},
+		Roles: Roles{
+			Tank:   false,
+			Healer: false,
+			Dps:    false,
+			Empty:  false,
+		},
 	}
 }
 
-func (ls *Listings) ForDutyAndDataCentres(duty string, dataCentres []string) *Listings {
+func (ls *Listings) ForUltimatesInMateria(duties []string, world string) *Listings {
 	listings := &Listings{Listings: []*Listing{}}
 
 	for _, l := range ls.Listings {
-		if l.Duty == duty {
-			for _, dataCentre := range dataCentres {
-				if l.DataCentre == dataCentre {
+		if l.DataCentre == world {
+			for _, d := range duties {
+				if l.Duty == d {
 					listings.Listings = append(listings.Listings, l)
 				}
 			}
@@ -53,41 +60,6 @@ func (ls *Listings) ForDutyAndDataCentres(duty string, dataCentres []string) *Li
 	}
 
 	return listings
-}
-
-func (ls *Listings) MostRecentUpdated() (*Listing, error) {
-	var mostRecentUpdated time.Time
-	var mostRecent *Listing
-
-	for _, l := range ls.Listings {
-		updatedAt, err := l.UpdatedAt()
-		if err != nil {
-			return nil, fmt.Errorf("Could not find most recent update time: %w", err)
-		}
-		if updatedAt.After(mostRecentUpdated) {
-			mostRecentUpdated = updatedAt
-			mostRecent = l
-		}
-	}
-
-	return mostRecent, nil
-}
-
-func (ls *Listings) UpdatedWithinLast(duration time.Duration) (*Listings, error) {
-	listings := &Listings{Listings: []*Listing{}}
-	now := time.Now()
-
-	for _, l := range ls.Listings {
-		updatedAt, err := l.UpdatedAt()
-		if err != nil {
-			return nil, fmt.Errorf("Could not find most recent update time: %w", err)
-		}
-		if now.Add(-duration).Before(updatedAt) {
-			listings.Listings = append(listings.Listings, l)
-		}
-	}
-
-	return listings, nil
 }
 
 func (ls *Listings) Add(l *Listing) {
@@ -100,27 +72,40 @@ func (ls *Listings) Add(l *Listing) {
 	ls.Listings = append(ls.Listings, l)
 }
 
-func (l *Listing) PartyDisplay() string {
-	var party strings.Builder
+func (l *Listing) PartyDisplay(emojis []*discordgo.Emoji) string {
+	var result strings.Builder
+
+	result.WriteString("Created by: ")
+	result.WriteString(l.Creator)
+	result.WriteByte('\n')
+
+	result.WriteString(EmojiFromStr("hourglass", emojis))
+	result.WriteString(" Expires left: ")
+	result.WriteString(l.Expires)
+	result.WriteByte('\n')
+
+	result.WriteString(EmojiFromStr("stopwatch", emojis))
+	result.WriteString(" Last updated: ")
+	result.WriteString(l.Updated)
+	result.WriteByte('\n')
+
+	result.WriteString(l.Description)
+	result.WriteByte('\n')
 
 	for _, slot := range l.Party {
 		if slot.Filled {
-			party.WriteString(slot.Job.Emoji() + " ")
+			result.WriteString(JobEmojiFromStr(slot.Job, emojis))
 		} else {
-			party.WriteString(slot.Roles.Emoji() + " ")
+			result.WriteString(slot.Roles.Emoji(emojis) + " ")
 		}
 	}
 
-	return party.String()
+	return result.String()
 
 }
 
-func (l *Listing) GetExpires() string {
-	return "<:hourglass:991379574187372655> " + l.Expires
-}
-
-func (l *Listing) GetUpdated() string {
-	return "<:stopwatch:991379573000388758> " + l.Updated
+func (l *Listing) GetUpdated(emojis []*discordgo.Emoji) string {
+	return fmt.Sprintf("%s %s", EmojiFromStr("stopwatch", emojis), l.Updated)
 }
 
 func (l *Listing) GetTags() string {
@@ -165,7 +150,7 @@ func (l *Listing) ExpiresAt() (time.Time, error) {
 	if len(match) != 0 {
 		seconds, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Expires, err)
 		}
 		return now.Add(time.Duration(seconds) * time.Second), nil
 	}
@@ -174,7 +159,7 @@ func (l *Listing) ExpiresAt() (time.Time, error) {
 	if len(match) != 0 {
 		minutes, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Expires, err)
 		}
 		return now.Add(time.Duration(minutes) * time.Minute), nil
 	}
@@ -183,12 +168,12 @@ func (l *Listing) ExpiresAt() (time.Time, error) {
 	if len(match) != 0 {
 		hours, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Expires, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Expires, err)
 		}
 		return now.Add(time.Duration(hours) * time.Hour), nil
 	}
 
-	return now, fmt.Errorf("Failed to parse time %v", l.Expires)
+	return now, fmt.Errorf("failed to parse time %v", l.Expires)
 }
 
 var updatedSecondsRegexp = regexp.MustCompile(`(\d+) seconds ago`)
@@ -222,7 +207,7 @@ func (l *Listing) UpdatedAt() (time.Time, error) {
 	if len(match) != 0 {
 		seconds, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Updated, err)
 		}
 		return now.Add(time.Duration(-seconds) * time.Second), nil
 	}
@@ -231,7 +216,7 @@ func (l *Listing) UpdatedAt() (time.Time, error) {
 	if len(match) != 0 {
 		minutes, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Updated, err)
 		}
 		return now.Add(time.Duration(-minutes) * time.Minute), nil
 	}
@@ -240,10 +225,10 @@ func (l *Listing) UpdatedAt() (time.Time, error) {
 	if len(match) != 0 {
 		hours, err := strconv.Atoi(match[1])
 		if err != nil {
-			return now, fmt.Errorf("Could not parse time %v: %w", l.Updated, err)
+			return now, fmt.Errorf("could not parse time %v: %w", l.Updated, err)
 		}
 		return now.Add(time.Duration(-hours) * time.Hour), nil
 	}
 
-	return now, fmt.Errorf("Failed to parse time %v", l.Updated)
+	return now, fmt.Errorf("failed to parse time %v", l.Updated)
 }
