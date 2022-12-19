@@ -30,21 +30,21 @@ func main() {
 	token, tokenExists := os.LookupEnv("DISCORD_TOKEN")
 
 	if !tokenExists {
-		log.Printf("Please provide a discord token")
+		log.Printf("Please provide DISCORD_TOKEN")
 		os.Exit(1)
 	}
 
 	guildId, guildIdExists := os.LookupEnv("GUILD_ID")
 
 	if !guildIdExists {
-		log.Printf("Please provide a guild ID to get emojis from")
+		log.Printf("Please provide GUILD_ID")
 		os.Exit(1)
 	}
 
 	channelId, channelIdExists := os.LookupEnv("CHANNEL_ID")
 
 	if !channelIdExists {
-		log.Printf("Please provide a channel ID to write to")
+		log.Printf("Please provide CHANNEL_ID")
 		os.Exit(1)
 	}
 
