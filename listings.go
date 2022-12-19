@@ -41,13 +41,13 @@ func (pf *PfState) FilterForUltimatesInMateria(duties []string) {
 	listings := make(map[string]*Listing)
 
 	for _, l := range pf.Listings {
-		//if l.DataCentre == "Materia" {
-		for _, d := range duties {
-			if l.Duty == d {
-				listings[l.Creator] = l
-				break
+		if l.DataCentre == "Materia" {
+			for _, d := range duties {
+				if l.Duty == d {
+					listings[l.Creator] = l
+					break
+				}
 			}
-			// }
 		}
 	}
 
@@ -118,7 +118,11 @@ func (l *Listing) PartyDisplay(emojis []*discordgo.Emoji) string {
 
 	// Tags
 	result.WriteString("Tags: ")
-	result.WriteString(strings.ReplaceAll(l.Tags, "][", "], ["))
+	tags := parseTags(l.Tags)
+	for _, t := range tags {
+		result.WriteString(t)
+		result.WriteByte(' ')
+	}
 
 	return result.String()
 
@@ -126,6 +130,22 @@ func (l *Listing) PartyDisplay(emojis []*discordgo.Emoji) string {
 
 func (l *Listing) GetUpdated(emojis []*discordgo.Emoji) string {
 	return fmt.Sprintf("%s %s", EmojiFromStr("stopwatch", emojis), l.Updated)
+}
+
+func parseTags(tags string) []string {
+	result := make([]string, 0)
+	raw := []byte(tags)
+	start := 0
+
+	for i, v := range raw {
+		if v == '[' {
+			start = i
+		} else if v == ']' {
+			result = append(result, string(raw[start:i+1]))
+		}
+	}
+
+	return result
 }
 
 var expiresSecondsRegexp = regexp.MustCompile(`in (\d+) seconds`)
