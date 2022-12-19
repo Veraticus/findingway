@@ -2,9 +2,13 @@ package murult
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/bwmarrin/discordgo"
 )
+
+var Logger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 
 func EmojiFromStr(str string, emojis []*discordgo.Emoji) string {
 	for _, e := range emojis {

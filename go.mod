@@ -1,4 +1,4 @@
-module github.com/yuyuriyuri/murult
+module github.com/yuyuriyuri/trappingway-go
 
 go 1.19
 

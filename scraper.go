@@ -8,22 +8,21 @@ import (
 
 type Scraper struct {
 	Url      string
-	Listings *Listings
+	Listings *PfState
 }
 
 func NewScraper(url string) *Scraper {
 	return &Scraper{
 		Url:      url,
-		Listings: &Listings{Listings: []*Listing{}},
+		Listings: NewPfState(),
 	}
 }
 
 func (s *Scraper) Scrape() error {
-	listings := &Listings{}
+	pf := NewPfState()
+	collector := colly.NewCollector()
 
-	c := colly.NewCollector()
-
-	c.OnHTML("#listings.list .listing", func(e *colly.HTMLElement) {
+	collector.OnHTML("#listings.list .listing", func(e *colly.HTMLElement) {
 		listing := &Listing{Party: []*Slot{}}
 
 		// We can unmarshal a fair amount of information
@@ -67,12 +66,12 @@ func (s *Scraper) Scrape() error {
 			listing.Party = append(listing.Party, slot)
 		})
 
-		listings.Add(listing)
+		pf.Add(listing)
 	})
 
-	c.Visit(s.Url)
+	collector.Visit(s.Url)
 
-	s.Listings = listings
+	s.Listings = pf
 
 	return nil
 }
