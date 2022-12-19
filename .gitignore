@@ -4,3 +4,4 @@ trappingway
 config.yaml
 **/**.bin
 node_modules/
+*.sh

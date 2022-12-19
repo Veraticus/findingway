@@ -10,25 +10,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type Listings struct {
-	Listings []*Listing
-}
-
-type Listing struct {
-	DataCentre  string
-	PfCategory  string
-	Duty        string `selector:".left .duty"`
-	Tags        string `selector:".left .description span"`
-	TagsColor   string `selector:".left .description span" attr:"class"`
-	Description string
-	MinIL       string `selector:".middle .stat .value"`
-	Creator     string `selector:".right .creator .text"`
-	World       string `selector:".right .world .text"`
-	Expires     string `selector:".right .expires .text"`
-	Updated     string `selector:".right .updated .text"`
-	Party       []*Slot
-}
-
 type Slot struct {
 	Roles  Roles
 	Job    string
@@ -46,52 +27,86 @@ func NewSlot() *Slot {
 	}
 }
 
-func (ls *Listings) ForUltimatesInMateria(duties []string, world string) *Listings {
-	listings := &Listings{Listings: []*Listing{}}
-
-	for _, l := range ls.Listings {
-		if l.DataCentre == world {
-			for _, d := range duties {
-				if l.Duty == d {
-					listings.Listings = append(listings.Listings, l)
-				}
-			}
-		}
-	}
-
-	return listings
+type PfState struct {
+	Listings map[string]*Listing
 }
 
-func (ls *Listings) Add(l *Listing) {
-	for _, existingListing := range ls.Listings {
-		if existingListing.Creator == l.Creator {
-			return
+func NewPfState() *PfState {
+	return &PfState{
+		Listings: make(map[string]*Listing),
+	}
+}
+
+func (pf *PfState) FilterForUltimatesInMateria(duties []string) {
+	listings := make(map[string]*Listing)
+
+	for _, l := range pf.Listings {
+		//if l.DataCentre == "Materia" {
+		for _, d := range duties {
+			if l.Duty == d {
+				listings[l.Creator] = l
+				break
+			}
+			// }
 		}
 	}
 
-	ls.Listings = append(ls.Listings, l)
+	pf.Listings = listings
+}
+
+func (pf *PfState) Add(l *Listing) {
+	pf.Listings[l.Creator] = l
+}
+
+type Listing struct {
+	DataCentre  string
+	PfCategory  string
+	Duty        string `selector:".left .duty"`
+	Tags        string `selector:".left .description span"`
+	TagsColor   string `selector:".left .description span" attr:"class"`
+	Description string
+	MinIL       string `selector:".middle .stat .value"`
+	Creator     string `selector:".right .creator .text"`
+	World       string `selector:".right .world .text"`
+	Expires     string `selector:".right .expires .text"`
+	Updated     string `selector:".right .updated .text"`
+	Party       []*Slot
 }
 
 func (l *Listing) PartyDisplay(emojis []*discordgo.Emoji) string {
 	var result strings.Builder
+	result.Grow(100)
 
+	// Title
+	result.WriteString("\n***")
+	result.WriteString(strings.ToUpper(l.Duty))
+	result.WriteString("***\n")
+
+	// Creator
 	result.WriteString("Created by: ")
 	result.WriteString(l.Creator)
 	result.WriteByte('\n')
 
+	// Creation time
 	result.WriteString(EmojiFromStr("hourglass", emojis))
-	result.WriteString(" Expires left: ")
+	result.WriteString(" Time left: ")
 	result.WriteString(l.Expires)
 	result.WriteByte('\n')
 
+	// Last activity
 	result.WriteString(EmojiFromStr("stopwatch", emojis))
 	result.WriteString(" Last updated: ")
 	result.WriteString(l.Updated)
 	result.WriteByte('\n')
 
+	// Description
+	result.WriteString("-----------\n")
 	result.WriteString(l.Description)
+	result.WriteString("\n-----------")
 	result.WriteByte('\n')
 
+	// Roster
+	result.WriteString("Roster: ")
 	for _, slot := range l.Party {
 		if slot.Filled {
 			result.WriteString(JobEmojiFromStr(slot.Job, emojis))
@@ -99,6 +114,11 @@ func (l *Listing) PartyDisplay(emojis []*discordgo.Emoji) string {
 			result.WriteString(slot.Roles.Emoji(emojis) + " ")
 		}
 	}
+	result.WriteByte('\n')
+
+	// Tags
+	result.WriteString("Tags: ")
+	result.WriteString(strings.ReplaceAll(l.Tags, "][", "], ["))
 
 	return result.String()
 
@@ -106,17 +126,6 @@ func (l *Listing) PartyDisplay(emojis []*discordgo.Emoji) string {
 
 func (l *Listing) GetUpdated(emojis []*discordgo.Emoji) string {
 	return fmt.Sprintf("%s %s", EmojiFromStr("stopwatch", emojis), l.Updated)
-}
-
-func (l *Listing) GetTags() string {
-	if len(l.Tags) == 0 {
-		return "_ _"
-	}
-	return l.Tags
-}
-
-func (l *Listing) GetDescription() string {
-	return "```" + l.Description + "```"
 }
 
 var expiresSecondsRegexp = regexp.MustCompile(`in (\d+) seconds`)
