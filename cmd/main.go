@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	murult "github.com/yuyuriyuri/trappingway-go"
+	murult "github.com/yuyuriyuri/trappingway-go/internal"
 )
 
 func main() {

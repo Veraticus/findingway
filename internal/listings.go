@@ -10,54 +10,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type Slot struct {
-	Roles  Roles
-	Job    string
-	Filled bool
-}
-
-func NewSlot() *Slot {
-	return &Slot{
-		Roles: Roles{
-			Tank:   false,
-			Healer: false,
-			Dps:    false,
-			Empty:  false,
-		},
-	}
-}
-
-type PfState struct {
-	Listings map[string]*Listing
-}
-
-func NewPfState() *PfState {
-	return &PfState{
-		Listings: make(map[string]*Listing),
-	}
-}
-
-func (pf *PfState) FilterForUltimatesInMateria(duties []string) {
-	listings := make(map[string]*Listing)
-
-	for _, l := range pf.Listings {
-		if l.DataCentre == "Materia" {
-			for _, d := range duties {
-				if l.Duty == d {
-					listings[l.Creator] = l
-					break
-				}
-			}
-		}
-	}
-
-	pf.Listings = listings
-}
-
-func (pf *PfState) Add(l *Listing) {
-	pf.Listings[l.Creator] = l
-}
-
 type Listing struct {
 	DataCentre  string
 	PfCategory  string
