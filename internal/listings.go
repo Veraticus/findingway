@@ -25,7 +25,7 @@ type Listing struct {
 	Party       []*Slot
 }
 
-func (l *Listing) PartyDisplay(emojis []*discordgo.Emoji) string {
+func (l *Listing) Stringify(emojis []*discordgo.Emoji) string {
 	var result strings.Builder
 	result.Grow(100)
 
