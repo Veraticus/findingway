@@ -7,18 +7,16 @@ import (
 )
 
 type Scraper struct {
-	Url      string
-	Listings *PfState
+	Url string
 }
 
 func NewScraper(url string) *Scraper {
 	return &Scraper{
-		Url:      url,
-		Listings: NewPfState(),
+		Url: url,
 	}
 }
 
-func (s *Scraper) Scrape() error {
+func (s *Scraper) Scrape() (*PfState, error) {
 	pf := NewPfState()
 	collector := colly.NewCollector()
 
@@ -69,9 +67,11 @@ func (s *Scraper) Scrape() error {
 		pf.Add(listing)
 	})
 
-	collector.Visit(s.Url)
+	err := collector.Visit(s.Url)
 
-	s.Listings = pf
-
-	return nil
+	if err != nil {
+		return nil, err
+	} else {
+		return pf, nil
+	}
 }

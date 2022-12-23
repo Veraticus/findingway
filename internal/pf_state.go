@@ -12,15 +12,14 @@ func NewPfState() *PfState {
 
 // GetListings returns an array of listings that is in the PF.
 // Can be filtered based on the arguments.
-func (pf *PfState) GetListings(duties []string) []*Listing {
-	list := make([]*Listing, 0)
+func (pf *PfState) GetListings(duties []string) map[string]*Listing {
+	list := make(map[string]*Listing, 0)
 
 	for _, l := range pf.listings {
 		if l.DataCentre == "Materia" {
 			for _, d := range duties {
 				if l.Duty == d {
-					list = append(list, l)
-					break
+					list[l.Creator] = l
 				}
 			}
 		}

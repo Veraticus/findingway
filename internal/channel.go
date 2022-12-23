@@ -5,8 +5,9 @@ import (
 )
 
 type Channel struct {
-	duties map[string]struct{}
-	emojis []*discordgo.Emoji
+	duties   map[string]struct{}
+	emojis   []*discordgo.Emoji
+	listings map[string]*Listing
 }
 
 func NewChannel() *Channel {
@@ -48,4 +49,33 @@ func (c *Channel) UpdateEmojis(emojis []*discordgo.Emoji) {
 
 func (c *Channel) Emojis() []*discordgo.Emoji {
 	return c.emojis
+}
+
+func (c *Channel) UpdatePosts(pf *PfState) (map[string]*Listing, map[string]*Listing, map[string]*Listing) {
+	currentPosts := pf.GetListings(c.Duties())
+	removedPosts := make(map[string]*Listing, 0)
+	updatedPosts := make(map[string]*Listing, 0)
+	newPosts := make(map[string]*Listing, 0)
+
+	for creator, newPost := range currentPosts {
+		oldPost, exists := c.listings[creator]
+
+		if !exists {
+			newPosts[creator] = newPost
+		} else {
+			updatedPosts[creator] = newPost
+			newPost.MessageId = oldPost.MessageId
+		}
+	}
+
+	for creator, oldPost := range c.listings {
+		_, exists := currentPosts[creator]
+		if !exists {
+			removedPosts[creator] = oldPost
+		}
+	}
+
+	c.listings = currentPosts
+
+	return removedPosts, updatedPosts, newPosts
 }

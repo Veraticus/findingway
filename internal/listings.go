@@ -23,6 +23,7 @@ type Listing struct {
 	Expires     string `selector:".right .expires .text"`
 	Updated     string `selector:".right .updated .text"`
 	Party       []*Slot
+	MessageId   string
 }
 
 func (l *Listing) Stringify(emojis []*discordgo.Emoji) string {
