@@ -16,7 +16,7 @@ type Server struct {
 	// TODO: Add ability for admins to trigger updates on emojis
 	Emojis   map[string]*discordgo.Emoji
 	Session  *discordgo.Session
-	Scraper  *Scraper
+	scraper  *Scraper
 	channels map[string]*Channel
 }
 
@@ -46,7 +46,7 @@ func NewServer(token string) *Server {
 		Token:    token,
 		Emojis:   make(map[string]*discordgo.Emoji),
 		Session:  session,
-		Scraper:  scraper,
+		scraper:  scraper,
 		channels: make(map[string]*Channel),
 	}
 
@@ -67,83 +67,54 @@ func (s *Server) CloseServer() {
 func (s *Server) Run(sleep int64) {
 	for {
 		s.lock.Lock()
-		err := s.Scraper.Scrape()
+		pfState, err := s.scraper.Scrape()
 
 		if err != nil {
 			Logger.Printf("scraper error: '%s'\n", err)
 			return
 		}
 
-		for cid := range s.channels {
-			err = s.CleanChannel(cid)
+		for channelId, channel := range s.channels {
+			removedPosts, updatedPosts, newPosts := channel.UpdatePosts(pfState)
 
-			if err != nil {
-				Logger.Printf("Discord error cleaning channel: %f\n", err)
-				return
+			for _, r := range removedPosts {
+				if r.MessageId != "" {
+					err := s.Session.ChannelMessageDelete(channelId, r.MessageId)
+
+					if err != nil {
+						Logger.Printf("Discord error cleaning channel: %f\n", err)
+					}
+				}
 			}
 
-			err = s.PostListingsToChannel(cid)
+			for _, p := range updatedPosts {
+				message, err := s.Session.ChannelMessageEdit(channelId, p.MessageId, p.Stringify(channel.Emojis()))
 
-			if err != nil {
-				Logger.Printf("Discord error updating message: %f\n", err)
-				return
+				if err != nil {
+					Logger.Printf("Discord error updating message: %f\n", err)
+				}
+
+				p.MessageId = message.ID
 			}
 
-			Logger.Printf("updated listing for channel %s\n", cid)
+			for _, p := range newPosts {
+				message, err := s.Session.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
+					Content: p.Stringify(channel.Emojis()),
+				})
 
+				if err != nil {
+					Logger.Printf("Discord error creating message: %f\n", err)
+				}
+
+				p.MessageId = message.ID
+			}
+
+			Logger.Printf("updated listing for channel %s\n", channelId)
 		}
 
 		s.lock.Unlock()
 		time.Sleep(time.Duration(sleep * int64(time.Minute)))
 	}
-}
-
-// CleanChannel cleans "all" the messages in a given channel.
-// The current implementation is quite bad, it cannot be relied on to delete all the
-// messages nor it is efficient in doing so.
-func (s *Server) CleanChannel(channelId string) error {
-	messages, err := s.Session.ChannelMessages(channelId, 100, "", "", "")
-
-	if err != nil {
-		return fmt.Errorf("could not list messages: %f", err)
-	}
-
-	for _, message := range messages {
-		err := s.Session.ChannelMessageDelete(channelId, message.ID)
-		if err != nil {
-			return fmt.Errorf("could not delete message %+v: %f", message, err)
-		}
-	}
-
-	return nil
-}
-
-func (s *Server) PostListingsToChannel(channelId string) error {
-	channel, exists := s.channels[channelId]
-
-	if !exists {
-		// TODO: Should we delete the channel here?
-		Logger.Println("Attempting to get listings for a channel that we are not tracking?")
-		return nil
-	}
-
-	duties := channel.Duties()
-
-	listings := s.Scraper.Listings.GetListings(duties)
-
-	for _, l := range listings {
-		message := &discordgo.MessageSend{
-			Content: l.Stringify(channel.Emojis()),
-		}
-
-		_, err := s.Session.ChannelMessageSendComplex(channelId, message)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (s *Server) clearCommands() {
@@ -180,19 +151,6 @@ func (s *Server) registerCommands() {
 
 		fmt.Printf("Created command '%s'\n", cmd.Name)
 	}
-}
-
-func (s *Server) Channel(channelId string) (*Channel, bool) {
-	v, e := s.channels[channelId]
-	return v, e
-}
-
-func (s *Server) Channels() []string {
-	result := make([]string, 0, len(s.channels))
-	for k := range s.channels {
-		result = append(result, k)
-	}
-	return result
 }
 
 func (s *Server) AddDuty(channelId, duty string) bool {

@@ -83,7 +83,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 			return
 		}
 
-		channel, exists := s.Channel(i.ChannelID)
+		channel, exists := s.channels[i.ChannelID]
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -146,7 +146,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 			return
 		}
 
-		channel, exists := s.Channel(i.ChannelID)
+		channel, exists := s.channels[i.ChannelID]
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -180,7 +180,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		channel, exists := s.Channel(i.ChannelID)
+		channel, exists := s.channels[i.ChannelID]
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -282,7 +282,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 			return
 		}
 
-		channel, exists := s.Channel(i.ChannelID)
+		channel, exists := s.channels[i.ChannelID]
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

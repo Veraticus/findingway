@@ -1,26 +1,25 @@
 package murult
 
 type PfState struct {
-	listings map[string]*Listing
+	listings map[string]*Post
 }
 
 func NewPfState() *PfState {
 	return &PfState{
-		listings: make(map[string]*Listing),
+		listings: make(map[string]*Post),
 	}
 }
 
 // GetListings returns an array of listings that is in the PF.
 // Can be filtered based on the arguments.
-func (pf *PfState) GetListings(duties []string) []*Listing {
-	list := make([]*Listing, 0)
+func (pf *PfState) GetListings(duties []string) map[string]*Post {
+	list := make(map[string]*Post, 0)
 
 	for _, l := range pf.listings {
 		if l.DataCentre == "Materia" {
 			for _, d := range duties {
 				if l.Duty == d {
-					list = append(list, l)
-					break
+					list[l.Creator] = l
 				}
 			}
 		}
@@ -29,7 +28,7 @@ func (pf *PfState) GetListings(duties []string) []*Listing {
 	return list
 }
 
-func (pf *PfState) Add(l *Listing) {
+func (pf *PfState) Add(l *Post) {
 	// TODO: Check if we already have this creator
 	// If we do, check which one is the latest one.
 	pf.listings[l.Creator] = l
