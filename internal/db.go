@@ -75,12 +75,12 @@ func (db *Db) InsertStatus(key, value string) bool {
 }
 
 func (db *Db) SelectStatus(key string) (string, bool) {
-	row := db.db.QueryRow("SELECT key FROM status WHERE key=?", key)
+	row := db.db.QueryRow("SELECT value FROM status WHERE key=?", key)
 
 	var result string
 	err := row.Scan(&result)
 
-	return result, err != nil
+	return result, err == nil
 }
 
 func (db *Db) InsertChannel(guildId, channelId string) bool {
