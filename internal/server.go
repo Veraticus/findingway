@@ -1,6 +1,7 @@
 package murult
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -46,7 +47,6 @@ func NewServer(token string) *Server {
 	db.CreateChannelsTable()
 	db.CreateRegionsTable()
 	db.CreateDutiesTable()
-	db.CreatePostsTable()
 
 	channels, ok := db.SelectAllChannels()
 
@@ -63,8 +63,8 @@ func NewServer(token string) *Server {
 		db:       db,
 	}
 
-	server.clearCommands()
-	server.registerCommands()
+	// server.clearCommands()
+	// server.registerCommands()
 
 	return server
 }
@@ -243,47 +243,73 @@ func (c *Server) Emojis(guildId string) []*discordgo.Emoji {
 
 func (s *Server) SendUpdates(pfState *PfState) {
 	for cid, channel := range s.channels {
-		removedPosts, updatedPosts, newPosts := channel.UpdatePosts(pfState)
+		postsAggr := channel.UpdatePosts(pfState)
+		s.CleanChannel(cid)
 
-		for _, r := range removedPosts {
-			if r.MessageId != "" {
-				err := s.session.ChannelMessageDelete(channel.channelId, r.MessageId)
+		embeds := make([]*discordgo.MessageEmbed, 0, 10)
+		for duty, posts := range postsAggr {
+			fields := make([]*discordgo.MessageEmbedField, 0, 10)
 
-				if err != nil {
-					Logger.Printf("Discord error cleaning channel because '%s'\n", err)
+			for _, p := range posts {
+				fields = append(fields, &discordgo.MessageEmbedField{
+					Name:  p.Creator,
+					Value: p.Stringify(s.Emojis(channel.guildId)),
+				})
+
+				if len(fields) == 5 {
+					_, err := s.session.ChannelMessageSendComplex(cid, &discordgo.MessageSend{
+						Content: fmt.Sprintf("**%s**\n", duty),
+						Embeds:  embeds,
+					})
+
+					if err != nil {
+						Logger.Printf("Discord error creating message because '%s'\n", err)
+						continue
+					}
+
+					embeds = make([]*discordgo.MessageEmbed, 0, 10)
 				}
 			}
-		}
 
-		for _, p := range updatedPosts {
-			if p.MessageId != "" {
-				message, err := s.session.ChannelMessageEdit(cid, p.MessageId, p.Stringify(s.Emojis(channel.guildId)))
+			if len(embeds) != 0 {
+				_, err := s.session.ChannelMessageSendComplex(cid, &discordgo.MessageSend{
+					Content: fmt.Sprintf("**%s**\n", duty),
+					Embeds:  embeds,
+				})
 
 				if err != nil {
-					Logger.Printf("Discord error updating message because '%s'\n", err)
+					Logger.Printf("Discord error creating message because '%s'\n", err)
 					continue
 				}
-
-				p.MessageId = message.ID
 			}
 		}
 
-		for _, p := range newPosts {
-			message, err := s.session.ChannelMessageSendComplex(cid, &discordgo.MessageSend{
-				Content: p.Stringify(s.Emojis(channel.guildId)),
-			})
+		if len(postsAggr) != 0 {
+			Logger.Printf("Updated listings for channel '%s'\n", cid)
+		}
+	}
+}
+
+func (s *Server) CleanChannel(channelId string) {
+	for {
+		messages, err := s.session.ChannelMessages(channelId, 100, "", "", "")
+
+		if err != nil {
+			Logger.Println("Unable to get messages from channel '%s'\n", err)
+			return
+		}
+
+		if len(messages) == 0 {
+			return
+		}
+
+		for _, message := range messages {
+			err := s.session.ChannelMessageDelete(channelId, message.ID)
 
 			if err != nil {
-				Logger.Printf("Discord error creating message because '%s'\n", err)
-				continue
+				Logger.Println("Unable to delete message '%s' from channel '%s'\n", message.ID, err)
+				return
 			}
-
-			p.MessageId = message.ID
-			s.db.InsertPost(cid, message.ID, p.Creator)
-		}
-
-		if len(removedPosts) != 0 || len(updatedPosts) != 0 || len(newPosts) != 0 {
-			Logger.Printf("Updated listings for channel '%s'\n", cid)
 		}
 	}
 }

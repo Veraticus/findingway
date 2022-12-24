@@ -47,14 +47,6 @@ func (db *Db) CreateDutiesTable() {
 	}
 }
 
-func (db *Db) CreatePostsTable() {
-	_, err := db.db.Exec("CREATE TABLE IF NOT EXISTS posts (channelId TEXT NOT NULL, messageId TEXT NOT NULL, creator TEXT NOT NULL, PRIMARY KEY(channelId, messageId, creator))")
-
-	if err != nil {
-		Logger.Printf("Unable to create posts table because '%s'\n", err)
-	}
-}
-
 func (db *Db) InsertChannel(guildId, channelId string) bool {
 	_, err := db.db.Exec("INSERT INTO channels (guildId, channelId) VALUES (?, ?)", guildId, channelId)
 
@@ -135,28 +127,6 @@ func (db *Db) RemoveDuty(channelId, name string) bool {
 	return true
 }
 
-func (db *Db) InsertPost(channelId, messageId, creator string) bool {
-	_, err := db.db.Exec("INSERT INTO posts (channelId, messageId, creator) VALUES (?, ?, ?)", channelId, messageId, creator)
-
-	if err != nil {
-		Logger.Printf("Unable to insert into posts table because '%s'\n", err)
-		return false
-	}
-
-	return true
-}
-
-func (db *Db) RemovePost(channelId, messageId, creator string) bool {
-	_, err := db.db.Exec("DELETE FROM posts WHERE channelId=? AND messageId=? AND creator=?", channelId, messageId, creator)
-
-	if err != nil {
-		Logger.Printf("Unable to remove from posts table because '%s'\n", err)
-		return false
-	}
-
-	return true
-}
-
 func (db *Db) SelectAllChannels() (map[string]*Channel, bool) {
 	channels := make(map[string]*Channel, 0)
 	dbChannels, err := db.db.Query("SELECT channelId, guildId FROM channels")
@@ -171,7 +141,6 @@ func (db *Db) SelectAllChannels() (map[string]*Channel, bool) {
 		guildId := ""
 		regions := make(map[string]struct{}, 0)
 		duties := make(map[string]struct{}, 0)
-		posts := make(map[string]*Post, 0)
 		err = dbChannels.Scan(&channelId, &guildId)
 
 		if err != nil {
@@ -223,33 +192,7 @@ func (db *Db) SelectAllChannels() (map[string]*Channel, bool) {
 			}
 		}
 
-		// Posts
-		{
-			dbPosts, err := db.db.Query("SELECT messageId, creator FROM posts WHERE channelId=?", channelId)
-
-			if err != nil {
-				Logger.Printf("Unable to query for posts: '%s'\n", err)
-				return channels, false
-			}
-
-			for dbPosts.Next() {
-				messageId := ""
-				creator := ""
-				err = dbPosts.Scan(&messageId, &creator)
-
-				if err != nil {
-					Logger.Printf("Unable to read from a row: '%s'\n", err)
-					return channels, false
-				}
-
-				post := NewPost()
-				post.MessageId = messageId
-				post.Creator = creator
-				posts[creator] = post
-			}
-		}
-
-		channels[channelId] = NewChannel(guildId, channelId, regions, duties, posts)
+		channels[channelId] = NewChannel(guildId, channelId, regions, duties, map[string]*Post{})
 	}
 
 	return channels, true

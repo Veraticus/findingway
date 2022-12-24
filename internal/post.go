@@ -23,7 +23,6 @@ type Post struct {
 	Expires     string `selector:".right .expires .text"`
 	Updated     string `selector:".right .updated .text"`
 	Party       []*Slot
-	MessageId   string
 }
 
 func NewPost() *Post {
@@ -35,16 +34,6 @@ func NewPost() *Post {
 func (l *Post) Stringify(emojis []*discordgo.Emoji) string {
 	var result strings.Builder
 	result.Grow(100)
-
-	// Title
-	result.WriteString("\n***")
-	result.WriteString(strings.ToUpper(l.Duty))
-	result.WriteString("***\n")
-
-	// Creator
-	result.WriteString("Created by: ")
-	result.WriteString(l.Creator)
-	result.WriteByte('\n')
 
 	// Creation time
 	result.WriteString(EmojiFromStr("hourglass", emojis))

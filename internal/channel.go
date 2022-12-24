@@ -43,31 +43,19 @@ func (s *Channel) Regions() []Region {
 	return result
 }
 
-func (c *Channel) UpdatePosts(pf *PfState) (map[string]*Post, map[string]*Post, map[string]*Post) {
-	currentPosts := pf.GetPosts(c.Duties(), c.Regions())
-	removedPosts := make(map[string]*Post, 0)
-	updatedPosts := make(map[string]*Post, 0)
-	newPosts := make(map[string]*Post, 0)
+func (c *Channel) UpdatePosts(pf *PfState) map[string][]*Post {
+	c.posts = pf.GetPosts(c.Duties(), c.Regions())
+	result := map[string][]*Post{}
 
-	for creator, newPost := range currentPosts {
-		oldPost, exists := c.posts[creator]
+	for _, p := range c.posts {
+		l, exists := result[p.Duty]
 
 		if !exists {
-			newPosts[creator] = newPost
-		} else {
-			updatedPosts[creator] = newPost
-			newPost.MessageId = oldPost.MessageId
+			l = []*Post{}
 		}
+
+		result[p.Duty] = append(l, p)
 	}
 
-	for creator, oldPost := range c.posts {
-		_, exists := currentPosts[creator]
-		if !exists {
-			removedPosts[creator] = oldPost
-		}
-	}
-
-	c.posts = currentPosts
-
-	return removedPosts, updatedPosts, newPosts
+	return result
 }
