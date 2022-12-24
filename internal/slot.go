@@ -1,14 +1,14 @@
 package murult
 
 type Slot struct {
-	Roles  Roles
+	Roles  Role
 	Job    string
 	Filled bool
 }
 
 func NewSlot() *Slot {
 	return &Slot{
-		Roles: Roles{
+		Roles: Role{
 			Tank:   false,
 			Healer: false,
 			Dps:    false,

@@ -2,14 +2,14 @@ package murult
 
 import "github.com/bwmarrin/discordgo"
 
-type Roles struct {
+type Role struct {
 	Tank   bool
 	Healer bool
 	Dps    bool
 	Empty  bool
 }
 
-func (rs Roles) Emoji(emojis []*discordgo.Emoji) string {
+func (rs Role) Emoji(emojis []*discordgo.Emoji) string {
 	if rs.Empty {
 		return EmojiFromStr("any_slot", emojis)
 	} else if rs.Tank && rs.Healer && rs.Dps {

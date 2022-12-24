@@ -10,7 +10,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type Listing struct {
+type Post struct {
 	DataCentre  string
 	PfCategory  string
 	Duty        string `selector:".left .duty"`
@@ -26,7 +26,7 @@ type Listing struct {
 	MessageId   string
 }
 
-func (l *Listing) Stringify(emojis []*discordgo.Emoji) string {
+func (l *Post) Stringify(emojis []*discordgo.Emoji) string {
 	var result strings.Builder
 	result.Grow(100)
 
@@ -81,7 +81,7 @@ func (l *Listing) Stringify(emojis []*discordgo.Emoji) string {
 
 }
 
-func (l *Listing) GetUpdated(emojis []*discordgo.Emoji) string {
+func (l *Post) GetUpdated(emojis []*discordgo.Emoji) string {
 	return fmt.Sprintf("%s %s", EmojiFromStr("stopwatch", emojis), l.Updated)
 }
 
@@ -105,7 +105,7 @@ var expiresSecondsRegexp = regexp.MustCompile(`in (\d+) seconds`)
 var expiresMinutesRegexp = regexp.MustCompile(`in (\d+) minutes`)
 var expiresHoursRegexp = regexp.MustCompile(`in (\d+) hours`)
 
-func (l *Listing) ExpiresAt() (time.Time, error) {
+func (l *Post) ExpiresAt() (time.Time, error) {
 	now := time.Now()
 
 	if l.Expires == "" {
@@ -162,7 +162,7 @@ var updatedSecondsRegexp = regexp.MustCompile(`(\d+) seconds ago`)
 var updatedMinutesRegexp = regexp.MustCompile(`(\d+) minutes ago`)
 var updatedHoursRegexp = regexp.MustCompile(`(\d+) hours ago`)
 
-func (l *Listing) UpdatedAt() (time.Time, error) {
+func (l *Post) UpdatedAt() (time.Time, error) {
 	now := time.Now()
 
 	if l.Updated == "" {

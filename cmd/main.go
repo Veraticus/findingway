@@ -42,8 +42,9 @@ func main() {
 	}
 
 	murult.Logger.Println("starting server...")
-	server := murult.NewServer(token)
-	defer server.CloseServer()
+	server := murult.InitServer(token)
 
-	server.Run(sleep)
+	if server != nil {
+		server.Run(sleep)
+	}
 }

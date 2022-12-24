@@ -34,10 +34,6 @@ var Commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{{
 	Description:              "List all the duties that we are currently watching",
 	DefaultMemberPermissions: &permission,
 }, {
-	Name:                     "register-channel",
-	Description:              "Tells the bot to post to this channel",
-	DefaultMemberPermissions: &permission,
-}, {
 	Name:                     "update-emojis",
 	Description:              "Update the emoji database for this channel",
 	DefaultMemberPermissions: &permission,
@@ -54,61 +50,21 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		options := i.ApplicationCommandData().Options
-		optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-
-		for _, opt := range options {
-			optionMap[opt.Name] = opt
-		}
-
-		maybeDuty, ok := optionMap["duty-name"]
-
-		if !ok {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Missing required field 'duty-name'",
-				},
-			})
-			return
-		}
-
-		if maybeDuty.Type != discordgo.ApplicationCommandOptionString {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("'duty-name' should be a string but we received a value of type '%s'\n", maybeDuty.Type.String()),
-				},
-			})
-			return
-		}
-
-		channel, exists := s.channels[i.ChannelID]
+		dutyName, exists := getDutyName(i.ApplicationCommandData())
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "This channel is not registered for this bot",
-				},
-			})
-			return
-		}
-
-		dutyName := maybeDuty.StringValue()
-
-		if channel.AddDuty(dutyName) {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Added `%s` to the list of tracked duties for this channel", dutyName),
+					Content: "Bad argument",
 				},
 			})
 		} else {
+			s.AddDuty(i.GuildID, i.ChannelID, dutyName)
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("We are already tacking a duty called `%s` for this channel", dutyName),
+					Content: fmt.Sprintf("Added `%s` to this channel", dutyName),
 				},
 			})
 		}
@@ -117,61 +73,21 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		options := i.ApplicationCommandData().Options
-		optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-
-		for _, opt := range options {
-			optionMap[opt.Name] = opt
-		}
-
-		maybeDuty, ok := optionMap["duty-name"]
-
-		if !ok {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Missing required field 'duty-name'",
-				},
-			})
-			return
-		}
-
-		if maybeDuty.Type != discordgo.ApplicationCommandOptionString {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("'duty-name' should be a string but we received a value of type '%s'\n", maybeDuty.Type.String()),
-				},
-			})
-			return
-		}
-
-		channel, exists := s.channels[i.ChannelID]
+		dutyName, exists := getDutyName(i.ApplicationCommandData())
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "This channel is not registered for this bot",
-				},
-			})
-			return
-		}
-
-		dutyName := maybeDuty.StringValue()
-
-		if channel.RemoveDuty(dutyName) {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Removed `%s` from the list of tracked duties for this channel", dutyName),
+					Content: "Bad argument",
 				},
 			})
 		} else {
+			s.RemoveDuty(i.ChannelID, dutyName)
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("This channel is not tracking a duty called `%s` for this channel", dutyName),
+					Content: fmt.Sprintf("Removed `%s` from this channel", dutyName),
 				},
 			})
 		}
@@ -218,84 +134,11 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 			},
 		})
 	},
-	"register-channel": func(
-		s *Server,
-		d *discordgo.Session,
-		i *discordgo.InteractionCreate) {
-		emojis, err := s.Session.GuildEmojis(i.GuildID)
-
-		if err != nil {
-			emojis = make([]*discordgo.Emoji, 0)
-		}
-
-		if s.AddChannel(i.ChannelID, emojis) {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Registration successful. You should use `/add-duty <duty-name>` command to add duties you want this channel to track",
-				},
-			})
-		} else {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "This channel is already registered",
-				},
-			})
-		}
-
-	},
-	"remove-channel": func(
-		s *Server,
-		d *discordgo.Session,
-		i *discordgo.InteractionCreate) {
-
-		if s.RemoveChannel(i.ChannelID) {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Removal successful. We will no long post listings to this channel",
-				},
-			})
-		} else {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "This channel is not even registered yet",
-				},
-			})
-		}
-	},
 	"update-emojis": func(
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		emojis, err := s.Session.GuildEmojis(i.GuildID)
-
-		if err != nil {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Failed to update emojis database because '%s'", err.Error()),
-				},
-			})
-			return
-		}
-
-		channel, exists := s.channels[i.ChannelID]
-
-		if !exists {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "This channel is not registered for this bot",
-				},
-			})
-			return
-		}
-
-		channel.UpdateEmojis(emojis)
-
+		s.UpdateEmojis(i.GuildID)
 		d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -303,3 +146,12 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 			},
 		})
 	}}
+
+func getDutyName(options discordgo.ApplicationCommandInteractionData) (string, bool) {
+	for _, opt := range options.Options {
+		if opt.Name == "duty-name" && opt.Type == discordgo.ApplicationCommandOptionString {
+			return opt.StringValue(), true
+		}
+	}
+	return "", false
+}
