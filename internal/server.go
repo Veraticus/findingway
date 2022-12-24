@@ -7,18 +7,20 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Server struct {
 	lock     sync.RWMutex
-	Token    string
-	Session  *discordgo.Session
-	Scraper  *Scraper
+	token    string
+	session  *discordgo.Session
+	scraper  *Scraper
 	channels map[string]*Channel
 	emojis   map[string][]*discordgo.Emoji
+	db       *Db
 }
 
-func InitServer(token string) *Server {
+func NewServer(token string) *Server {
 	session, err := discordgo.New("Bot " + token)
 
 	if err != nil {
@@ -40,12 +42,25 @@ func InitServer(token string) *Server {
 		return nil
 	}
 
+	db := NewDb()
+
+	db.CreateChannelsTable()
+	db.CreateDutiesTable()
+	db.CreatePostsTable()
+
+	channels, ok := db.SelectAllChannels()
+
+	if !ok {
+		return nil
+	}
+
 	server := &Server{
-		Token:    token,
-		Session:  session,
-		Scraper:  scraper,
-		channels: make(map[string]*Channel),
+		token:    token,
+		session:  session,
+		scraper:  scraper,
+		channels: channels,
 		emojis:   make(map[string][]*discordgo.Emoji),
+		db:       db,
 	}
 
 	server.clearCommands()
@@ -54,10 +69,15 @@ func InitServer(token string) *Server {
 	return server
 }
 
+func (s *Server) CloseServer() {
+	s.db.Close()
+	s.session.Close()
+}
+
 func (s *Server) Run(sleep int64) {
 	for {
 		s.lock.Lock()
-		pfState, err := s.Scraper.Scrape()
+		pfState, err := s.scraper.Scrape()
 
 		if err != nil {
 			Logger.Printf("scraper error: '%s'\n", err)
@@ -70,7 +90,7 @@ func (s *Server) Run(sleep int64) {
 
 			for _, r := range removedPosts {
 				if r.MessageId != "" {
-					err := s.Session.ChannelMessageDelete(cid, r.MessageId)
+					err := s.session.ChannelMessageDelete(cid, r.MessageId)
 
 					if err != nil {
 						Logger.Printf("Discord error cleaning channel: %f\n", err)
@@ -79,18 +99,20 @@ func (s *Server) Run(sleep int64) {
 			}
 
 			for _, p := range updatedPosts {
-				message, err := s.Session.ChannelMessageEdit(cid, p.MessageId, p.Stringify(s.Emojis(channel.guildId)))
+				if p.MessageId != "" {
+					message, err := s.session.ChannelMessageEdit(cid, p.MessageId, p.Stringify(s.Emojis(channel.guildId)))
 
-				if err != nil {
-					Logger.Printf("Discord error updating message: %f\n", err)
-					continue
+					if err != nil {
+						Logger.Printf("Discord error updating message: %f\n", err)
+						continue
+					}
+
+					p.MessageId = message.ID
 				}
-
-				p.MessageId = message.ID
 			}
 
 			for _, p := range newPosts {
-				message, err := s.Session.ChannelMessageSendComplex(cid, &discordgo.MessageSend{
+				message, err := s.session.ChannelMessageSendComplex(cid, &discordgo.MessageSend{
 					Content: p.Stringify(s.Emojis(channel.guildId)),
 				})
 
@@ -100,6 +122,7 @@ func (s *Server) Run(sleep int64) {
 				}
 
 				p.MessageId = message.ID
+				s.db.InsertPost(cid, message.ID, p.Creator)
 			}
 
 			Logger.Printf("updated channel `%s`\n", cid)
@@ -111,14 +134,14 @@ func (s *Server) Run(sleep int64) {
 }
 
 func (s *Server) clearCommands() {
-	registeredCommands, err := s.Session.ApplicationCommands(s.Session.State.User.ID, "")
+	registeredCommands, err := s.session.ApplicationCommands(s.session.State.User.ID, "")
 
 	if err != nil {
 		log.Fatalf("Could not fetch registered commands: %v", err)
 	}
 
 	for _, v := range registeredCommands {
-		err := s.Session.ApplicationCommandDelete(s.Session.State.User.ID, "", v.ID)
+		err := s.session.ApplicationCommandDelete(s.session.State.User.ID, "", v.ID)
 
 		if err != nil {
 			log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
@@ -129,14 +152,14 @@ func (s *Server) clearCommands() {
 }
 
 func (s *Server) registerCommands() {
-	s.Session.AddHandler(func(d *discordgo.Session, i *discordgo.InteractionCreate) {
+	s.session.AddHandler(func(d *discordgo.Session, i *discordgo.InteractionCreate) {
 		if cmd, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
 			cmd(s, d, i)
 		}
 	})
 
 	for _, v := range Commands {
-		cmd, err := s.Session.ApplicationCommandCreate(s.Session.State.User.ID, "", v)
+		cmd, err := s.session.ApplicationCommandCreate(s.session.State.User.ID, "", v)
 
 		if err != nil {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
@@ -148,8 +171,11 @@ func (s *Server) registerCommands() {
 
 func (s *Server) AddDuty(guildId, channelId, duty string) {
 	channel, exists := s.channels[channelId]
+
 	if exists {
 		channel.duties[duty] = struct{}{}
+
+		s.db.InsertDuty(channelId, duty)
 	} else {
 		s.channels[channelId] = NewChannel(
 			guildId,
@@ -157,13 +183,23 @@ func (s *Server) AddDuty(guildId, channelId, duty string) {
 				duty: {},
 			},
 			map[string]*Post{})
+
+		s.db.InsertChannel(guildId, channelId)
+		s.db.InsertDuty(channelId, duty)
 	}
 }
 
 func (s *Server) RemoveDuty(channelId, duty string) {
 	channel, exists := s.channels[channelId]
+
 	if exists {
 		delete(channel.duties, duty)
+
+		s.db.RemoveDuty(channelId, duty)
+
+		if len(channel.duties) == 0 {
+			s.db.RemoveChannel(channel.guildId, channelId)
+		}
 	}
 }
 
@@ -177,7 +213,7 @@ func (s *Server) Duties(channelId string) map[string]struct{} {
 }
 
 func (c *Server) UpdateEmojis(guildId string) {
-	emojis, err := c.Session.GuildEmojis(guildId)
+	emojis, err := c.session.GuildEmojis(guildId)
 
 	if err != nil {
 		Logger.Printf("Unable to update emojis for '%s'\n", guildId)

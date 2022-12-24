@@ -5,3 +5,5 @@ config.yaml
 **/**.bin
 node_modules/
 *.sh
+*.db
+*.db.sqbpro

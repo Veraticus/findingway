@@ -26,6 +26,12 @@ type Post struct {
 	MessageId   string
 }
 
+func NewPost() *Post {
+	return &Post{
+		Party: make([]*Slot, 0),
+	}
+}
+
 func (l *Post) Stringify(emojis []*discordgo.Emoji) string {
 	var result strings.Builder
 	result.Grow(100)
