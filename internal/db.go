@@ -31,19 +31,27 @@ func (db *Db) CreateChannelsTable() {
 	}
 }
 
-func (db *Db) CreateDutiesTable() {
-	_, err := db.db.Exec("CREATE TABLE duties (channelId TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(channelId, name))")
+func (db *Db) CreateRegionsTable() {
+	_, err := db.db.Exec("CREATE TABLE IF NOT EXISTS regions (channelId TEXT NOT NULL, region TEXT NOT NULL, PRIMARY KEY(channelId, region))")
 
 	if err != nil {
-		Logger.Printf("Unable to create channels table because '%s'\n", err)
+		Logger.Printf("Unable to create regions table because '%s'\n", err)
+	}
+}
+
+func (db *Db) CreateDutiesTable() {
+	_, err := db.db.Exec("CREATE TABLE IF NOT EXISTS duties (channelId TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(channelId, name))")
+
+	if err != nil {
+		Logger.Printf("Unable to create duties table because '%s'\n", err)
 	}
 }
 
 func (db *Db) CreatePostsTable() {
-	_, err := db.db.Exec("CREATE TABLE posts (channelId TEXT NOT NULL, messageId TEXT NOT NULL, creator TEXT NOT NULL, PRIMARY KEY(channelId, messageId, creator))")
+	_, err := db.db.Exec("CREATE TABLE IF NOT EXISTS posts (channelId TEXT NOT NULL, messageId TEXT NOT NULL, creator TEXT NOT NULL, PRIMARY KEY(channelId, messageId, creator))")
 
 	if err != nil {
-		Logger.Printf("Unable to create channels table because '%s'\n", err)
+		Logger.Printf("Unable to create posts table because '%s'\n", err)
 	}
 }
 
@@ -59,24 +67,46 @@ func (db *Db) InsertChannel(guildId, channelId string) bool {
 }
 
 func (db *Db) RemoveChannel(guildId, channelId string) bool {
-	_, err := db.db.Exec("REMOVE FROM posts WHERE channelId=?", channelId)
+	_, err := db.db.Exec("DELETE FROM posts WHERE channelId=?", channelId)
 
 	if err != nil {
 		Logger.Printf("Unable to clear posts with channelId='%s' because '%s'\n", channelId, err)
 		return false
 	}
 
-	_, err = db.db.Exec("REMOVE FROM duties WHERE channelId=?", channelId)
+	_, err = db.db.Exec("DELETE FROM duties WHERE channelId=?", channelId)
 
 	if err != nil {
 		Logger.Printf("Unable to clear duties with channelId='%s' because '%s'\n", channelId, err)
 		return false
 	}
 
-	_, err = db.db.Exec("REMOVE FROM channels WHERE guildId=? AND channelId=?", guildId, channelId)
+	_, err = db.db.Exec("DELETE FROM channels WHERE guildId=? AND channelId=?", guildId, channelId)
 
 	if err != nil {
 		Logger.Printf("Unable to remove from channels table because '%s'\n", err)
+		return false
+	}
+
+	return true
+}
+
+func (db *Db) InsertRegion(channelId string, region Region) bool {
+	_, err := db.db.Exec("INSERT INTO regions (channelId, region) VALUES (?, ?)", channelId, region)
+
+	if err != nil {
+		Logger.Printf("Unable to insert into regions table because '%s'\n", err)
+		return false
+	}
+
+	return true
+}
+
+func (db *Db) RemoveRegion(channelId, region Region) bool {
+	_, err := db.db.Exec("DELETE FROM regions WHERE channelId=? AND region=?", channelId, region)
+
+	if err != nil {
+		Logger.Printf("Unable to remove from regions table because '%s'\n", err)
 		return false
 	}
 
@@ -95,7 +125,7 @@ func (db *Db) InsertDuty(channelId, name string) bool {
 }
 
 func (db *Db) RemoveDuty(channelId, name string) bool {
-	_, err := db.db.Exec("REMOVE FROM duties WHERE channelId=? AND name=?", channelId, name)
+	_, err := db.db.Exec("DELETE FROM duties WHERE channelId=? AND name=?", channelId, name)
 
 	if err != nil {
 		Logger.Printf("Unable to remove from duties table because '%s'\n", err)
@@ -117,7 +147,7 @@ func (db *Db) InsertPost(channelId, messageId, creator string) bool {
 }
 
 func (db *Db) RemovePost(channelId, messageId, creator string) bool {
-	_, err := db.db.Exec("REMOVE FROM posts WHERE channelId=? AND messageId=? AND creator=?", channelId, messageId, creator)
+	_, err := db.db.Exec("DELETE FROM posts WHERE channelId=? AND messageId=? AND creator=?", channelId, messageId, creator)
 
 	if err != nil {
 		Logger.Printf("Unable to remove from posts table because '%s'\n", err)
@@ -139,6 +169,7 @@ func (db *Db) SelectAllChannels() (map[string]*Channel, bool) {
 	for dbChannels.Next() {
 		channelId := ""
 		guildId := ""
+		regions := make(map[string]struct{}, 0)
 		duties := make(map[string]struct{}, 0)
 		posts := make(map[string]*Post, 0)
 		err = dbChannels.Scan(&channelId, &guildId)
@@ -148,54 +179,82 @@ func (db *Db) SelectAllChannels() (map[string]*Channel, bool) {
 			return channels, false
 		}
 
-		dbDuties, err := db.db.Query("SELECT name FROM duties WHERE channelId=?", channelId)
-
-		if err != nil {
-			Logger.Printf("Unable to query for channels: '%s'\n", err)
-			return channels, false
-		}
-
-		for dbDuties.Next() {
-			duty := ""
-			err = dbDuties.Scan(&duty)
+		// Regions
+		{
+			dbRegions, err := db.db.Query("SELECT region FROM regions WHERE channelId=?", channelId)
 
 			if err != nil {
-				Logger.Printf("Unable to read from a row: '%s'\n", err)
+				Logger.Printf("Unable to query for regions: '%s'\n", err)
 				return channels, false
 			}
 
-			duties[duty] = struct{}{}
+			for dbRegions.Next() {
+				region := ""
+				err = dbRegions.Scan(&region)
+
+				if err != nil {
+					Logger.Printf("Unable to read from a row: '%s'\n", err)
+					return channels, false
+				}
+
+				regions[region] = struct{}{}
+			}
 		}
 
-		dbPosts, err := db.db.Query("SELECT messageId, creator FROM posts WHERE channelId=?", channelId)
-
-		if err != nil {
-			Logger.Printf("Unable to query for channels: '%s'\n", err)
-			return channels, false
-		}
-
-		for dbPosts.Next() {
-			messageId := ""
-			creator := ""
-			err = dbPosts.Scan(&messageId, &creator)
+		// Duties
+		{
+			dbDuties, err := db.db.Query("SELECT name FROM duties WHERE channelId=?", channelId)
 
 			if err != nil {
-				Logger.Printf("Unable to read from a row: '%s'\n", err)
+				Logger.Printf("Unable to query for duties: '%s'\n", err)
 				return channels, false
 			}
 
-			post := NewPost()
-			post.MessageId = messageId
-			post.Creator = creator
-			posts[creator] = post
+			for dbDuties.Next() {
+				duty := ""
+				err = dbDuties.Scan(&duty)
+
+				if err != nil {
+					Logger.Printf("Unable to read from a row: '%s'\n", err)
+					return channels, false
+				}
+
+				duties[duty] = struct{}{}
+			}
 		}
 
-		channels[channelId] = NewChannel(guildId, duties, posts)
+		// Posts
+		{
+			dbPosts, err := db.db.Query("SELECT messageId, creator FROM posts WHERE channelId=?", channelId)
+
+			if err != nil {
+				Logger.Printf("Unable to query for posts: '%s'\n", err)
+				return channels, false
+			}
+
+			for dbPosts.Next() {
+				messageId := ""
+				creator := ""
+				err = dbPosts.Scan(&messageId, &creator)
+
+				if err != nil {
+					Logger.Printf("Unable to read from a row: '%s'\n", err)
+					return channels, false
+				}
+
+				post := NewPost()
+				post.MessageId = messageId
+				post.Creator = creator
+				posts[creator] = post
+			}
+		}
+
+		channels[channelId] = NewChannel(guildId, channelId, regions, duties, posts)
 	}
 
 	return channels, true
 }
 
-func (db *Db) Close() {
-	db.db.Close()
+func (db *Db) Close() error {
+	return db.db.Close()
 }

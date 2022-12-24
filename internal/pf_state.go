@@ -1,5 +1,7 @@
 package murult
 
+import "time"
+
 type PfState struct {
 	posts map[string]*Post
 }
@@ -12,14 +14,39 @@ func NewPfState() *PfState {
 
 // GetPosts returns an array of posts that is in the PF.
 // Can be filtered based on the arguments.
-func (pf *PfState) GetPosts(duties []string) map[string]*Post {
+func (pf *PfState) GetPosts(duties []string, regions []Region) map[string]*Post {
 	list := make(map[string]*Post, 0)
 
-	for _, l := range pf.posts {
-		if l.DataCentre == "Materia" {
-			for _, d := range duties {
-				if l.Duty == d {
-					list[l.Creator] = l
+	for _, post := range pf.posts {
+		for _, region := range regions {
+			worlds := WorldsFromRegion(region)
+			for _, world := range worlds {
+				for _, duty := range duties {
+					if post.Duty == duty && post.DataCentre == world {
+						oldPost, exists := list[post.Creator]
+
+						if exists {
+							oldTime, err := oldPost.ExpiresAt()
+
+							if err != nil {
+								oldTime = time.Time{}
+							}
+
+							newTime, err := post.ExpiresAt()
+
+							if err != nil {
+								oldTime = time.Time{}
+							}
+
+							if newTime.After(oldTime) {
+								list[post.Creator] = post
+							} else {
+								list[post.Creator] = oldPost
+							}
+						}
+
+						list[post.Creator] = post
+					}
 				}
 			}
 		}

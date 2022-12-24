@@ -16,7 +16,7 @@ func main() {
 		switch arg {
 		default:
 			{
-				fmt.Printf("unknown option '%s'", arg)
+				fmt.Printf("Unknown option '%s'\n", arg)
 			}
 		}
 	}
@@ -24,7 +24,7 @@ func main() {
 	token, tokenExists := os.LookupEnv("DISCORD_TOKEN")
 
 	if !tokenExists {
-		fmt.Printf("Please provide DISCORD_TOKEN")
+		fmt.Println("Please provide DISCORD_TOKEN")
 		os.Exit(1)
 	}
 
@@ -34,14 +34,14 @@ func main() {
 		sleep64, err := strconv.ParseInt(sleepStr, 10, 64)
 
 		if err != nil {
-			fmt.Printf("bad input for --sleep: %s\n", err)
+			fmt.Printf("Bad input for --sleep: %s\n", err)
 			os.Exit(1)
 		}
 
 		sleep = sleep64
 	}
 
-	murult.Logger.Println("starting server...")
+	murult.Logger.Println("Starting server...")
 	server := murult.NewServer(token)
 
 	if server == nil {

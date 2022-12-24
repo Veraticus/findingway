@@ -1,19 +1,25 @@
 package murult
 
 type Channel struct {
-	guildId string
-	duties  map[string]struct{}
-	posts   map[string]*Post
+	guildId   string
+	channelId string
+	regions   map[Region]struct{}
+	duties    map[string]struct{}
+	posts     map[string]*Post
 }
 
 func NewChannel(
 	guildId string,
+	channelId string,
+	regions map[Region]struct{},
 	duties map[string]struct{},
 	posts map[string]*Post) *Channel {
 	return &Channel{
-		guildId: guildId,
-		duties:  duties,
-		posts:   posts,
+		guildId:   guildId,
+		channelId: channelId,
+		regions:   regions,
+		duties:    duties,
+		posts:     posts,
 	}
 }
 
@@ -27,8 +33,18 @@ func (s *Channel) Duties() []string {
 	return result
 }
 
+func (s *Channel) Regions() []Region {
+	result := make([]Region, 0, len(s.regions))
+
+	for k := range s.regions {
+		result = append(result, k)
+	}
+
+	return result
+}
+
 func (c *Channel) UpdatePosts(pf *PfState) (map[string]*Post, map[string]*Post, map[string]*Post) {
-	currentPosts := pf.GetPosts(c.Duties())
+	currentPosts := pf.GetPosts(c.Duties(), c.Regions())
 	removedPosts := make(map[string]*Post, 0)
 	updatedPosts := make(map[string]*Post, 0)
 	newPosts := make(map[string]*Post, 0)

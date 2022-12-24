@@ -21,19 +21,19 @@ func (s *Scraper) Scrape() (*PfState, error) {
 	collector := colly.NewCollector()
 
 	collector.OnHTML("#listings.list .listing", func(e *colly.HTMLElement) {
-		posts := &Post{Party: []*Slot{}}
+		post := &Post{Party: []*Slot{}}
 
 		// We can unmarshal a fair amount of information
-		e.Unmarshal(posts)
+		e.Unmarshal(post)
 
 		// Get attributes which are unmarshall-able
-		posts.DataCentre = e.Attr("data-centre")
-		posts.PfCategory = e.Attr("data-pf-category")
+		post.DataCentre = e.Attr("data-centre")
+		post.PfCategory = e.Attr("data-pf-category")
 
 		// Get everything else that isn't easily inferred; first description
 		description := e.ChildText(".left .description")
-		description = strings.TrimSpace(strings.Replace(description, posts.Tags, "", -1))
-		posts.Description = description
+		description = strings.TrimSpace(strings.Replace(description, post.Tags, "", -1))
+		post.Description = description
 
 		// Then the party list
 		e.ForEach(".party .slot", func(s int, p *colly.HTMLElement) {
@@ -61,10 +61,10 @@ func (s *Scraper) Scrape() (*PfState, error) {
 				slot.Job = p.Attr("title")
 			}
 
-			posts.Party = append(posts.Party, slot)
+			post.Party = append(post.Party, slot)
 		})
 
-		pf.Add(posts)
+		pf.Add(post)
 	})
 
 	err := collector.Visit(s.Url)
