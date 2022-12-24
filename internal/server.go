@@ -9,6 +9,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const (
+	VERSION_KEY   string = "version"
+	VERSION_VALUE string = "24-12-2022"
+)
+
 type Server struct {
 	lock     sync.RWMutex
 	token    string
@@ -43,6 +48,7 @@ func NewServer(token string) *Server {
 
 	db := NewDb()
 
+	db.CreateStatusTable()
 	db.CreateChannelsTable()
 	db.CreateRegionsTable()
 	db.CreateDutiesTable()
@@ -63,8 +69,15 @@ func NewServer(token string) *Server {
 		db:       db,
 	}
 
-	server.clearCommands()
-	server.registerCommands()
+	version, exists := db.SelectStatus(VERSION_KEY)
+
+	if !exists || version != VERSION_VALUE {
+		if server.clearCommands() && server.registerCommands() {
+			db.InsertStatus(VERSION_KEY, VERSION_VALUE)
+		} else {
+			return nil
+		}
+	}
 
 	return server
 }
@@ -101,11 +114,12 @@ func (s *Server) Run(sleep int64) {
 	}
 }
 
-func (s *Server) clearCommands() {
+func (s *Server) clearCommands() bool {
 	registeredCommands, err := s.session.ApplicationCommands(s.session.State.User.ID, "")
 
 	if err != nil {
 		log.Printf("Could not fetch registered commands: %v\n", err)
+		return false
 	}
 
 	for _, v := range registeredCommands {
@@ -113,14 +127,16 @@ func (s *Server) clearCommands() {
 
 		if err != nil {
 			log.Printf("Cannot delete '%s' command because %s\n", v.Name, err)
-			continue
+			return false
 		}
 
 		Logger.Printf("Deleted command `%s`\n", v.Name)
 	}
+
+	return true
 }
 
-func (s *Server) registerCommands() {
+func (s *Server) registerCommands() bool {
 	s.session.AddHandler(func(d *discordgo.Session, i *discordgo.InteractionCreate) {
 		if cmd, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
 			cmd(s, d, i)
@@ -132,11 +148,13 @@ func (s *Server) registerCommands() {
 
 		if err != nil {
 			log.Printf("Cannot create '%s' command because %s\n", v.Name, err)
-			continue
+			return false
 		}
 
 		Logger.Printf("Created command `%s`\n", cmd.Name)
 	}
+
+	return true
 }
 
 func (s *Server) AddRegion(guildId, channelId string, region Region) {

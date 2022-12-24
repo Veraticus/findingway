@@ -23,6 +23,14 @@ func NewDb() *Db {
 	}
 }
 
+func (db *Db) CreateStatusTable() {
+	_, err := db.db.Exec("CREATE TABLE IF NOT EXISTS status (key TEXT NOT NULL, value TEXT NOT NULL, PRIMARY KEY(key))")
+
+	if err != nil {
+		Logger.Printf("Unable to create channels table because '%s'\n", err)
+	}
+}
+
 func (db *Db) CreateChannelsTable() {
 	_, err := db.db.Exec("CREATE TABLE IF NOT EXISTS channels (channelId TEXT NOT NULL, guildId TEXT NOT NULL, PRIMARY KEY(channelId, guildId))")
 
@@ -53,6 +61,26 @@ func (db *Db) CreatePostsTable() {
 	if err != nil {
 		Logger.Printf("Unable to create posts table because '%s'\n", err)
 	}
+}
+
+func (db *Db) InsertStatus(key, value string) bool {
+	_, err := db.db.Exec("INSERT INTO status (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = ?;", key, value, value)
+
+	if err != nil {
+		Logger.Printf("Unable to insert into status table because '%s'\n", err)
+		return false
+	}
+
+	return true
+}
+
+func (db *Db) SelectStatus(key string) (string, bool) {
+	row := db.db.QueryRow("SELECT key FROM status WHERE key=?", key)
+
+	var result string
+	err := row.Scan(&result)
+
+	return result, err != nil
 }
 
 func (db *Db) InsertChannel(guildId, channelId string) bool {
