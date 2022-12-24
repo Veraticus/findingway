@@ -43,9 +43,9 @@ func (pf *PfState) GetPosts(duties []string, regions []Region) map[string]*Post 
 							} else {
 								list[post.Creator] = oldPost
 							}
+						} else {
+							list[post.Creator] = post
 						}
-
-						list[post.Creator] = post
 					}
 				}
 			}
