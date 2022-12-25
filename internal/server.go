@@ -18,7 +18,7 @@ type Server struct {
 	db       *Db
 }
 
-func NewServer(token string) *Server {
+func NewServer(token, path string) *Server {
 	session, err := discordgo.New("Bot " + token)
 
 	if err != nil {
@@ -40,7 +40,7 @@ func NewServer(token string) *Server {
 		return nil
 	}
 
-	db := NewDb()
+	db := NewDb(path)
 
 	db.CreateChannelsTable()
 	db.CreateRegionsTable()

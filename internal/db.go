@@ -10,8 +10,8 @@ type Db struct {
 	db *sql.DB
 }
 
-func NewDb() *Db {
-	db, err := sql.Open("sqlite3", "murult.db")
+func NewDb(path string) *Db {
+	db, err := sql.Open("sqlite3", path)
 
 	if err != nil {
 		Logger.Printf("Unable to open sqlite3 DB because '%s'\n", err)
