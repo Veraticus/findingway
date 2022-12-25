@@ -34,7 +34,7 @@ func main() {
 		sleep64, err := strconv.ParseInt(sleepStr, 10, 64)
 
 		if err != nil {
-			fmt.Printf("Bad input for --sleep: %s\n", err)
+			fmt.Printf("Bad input for SLEEP: %s\n", err)
 			os.Exit(1)
 		}
 

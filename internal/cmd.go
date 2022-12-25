@@ -3,15 +3,19 @@ package murult
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 var permission int64 = discordgo.PermissionManageServer
+var gmtOffsetMin float64 = -12
+var gmtOffsetMax float64 = 12
 
 var Commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{{
 	Name:        "add-duty",
 	Description: "Add the specified duty to the watch list",
+	Type:        discordgo.ChatApplicationCommand,
 	Options: []*discordgo.ApplicationCommandOption{{
 		Type:        discordgo.ApplicationCommandOptionString,
 		Name:        "duty-name",
@@ -23,6 +27,7 @@ var Commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{{
 }, {
 	Name:        "remove-duty",
 	Description: "Remove the specified duty from the watch list",
+	Type:        discordgo.ChatApplicationCommand,
 	Options: []*discordgo.ApplicationCommandOption{{
 		Type:        discordgo.ApplicationCommandOptionString,
 		Name:        "duty-name",
@@ -34,6 +39,7 @@ var Commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{{
 }, {
 	Name:        "add-region",
 	Description: "Add the specified region",
+	Type:        discordgo.ChatApplicationCommand,
 	Options: []*discordgo.ApplicationCommandOption{{
 		Type:        discordgo.ApplicationCommandOptionString,
 		Name:        "region-name",
@@ -45,6 +51,7 @@ var Commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{{
 }, {
 	Name:        "remove-region",
 	Description: "Remove the specified region",
+	Type:        discordgo.ChatApplicationCommand,
 	Options: []*discordgo.ApplicationCommandOption{{
 		Type:        discordgo.ApplicationCommandOptionString,
 		Name:        "region-name",
@@ -56,11 +63,63 @@ var Commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{{
 }, {
 	Name:                     "info",
 	Description:              "Show relevant information about this channel",
+	Type:                     discordgo.ChatApplicationCommand,
 	DefaultMemberPermissions: &permission,
 }, {
 	Name:                     "update-emojis",
 	Description:              "Update the emoji database for this channel",
+	Type:                     discordgo.ChatApplicationCommand,
 	DefaultMemberPermissions: &permission,
+}, {
+	Name:                     "timezzz",
+	Description:              "Generate timestamp",
+	Type:                     discordgo.ChatApplicationCommand,
+	DefaultMemberPermissions: &permission,
+	Options: []*discordgo.ApplicationCommandOption{{
+		Type:        discordgo.ApplicationCommandOptionInteger,
+		Name:        "year",
+		Description: "Year",
+		Required:    true,
+	}, {
+		Type:        discordgo.ApplicationCommandOptionInteger,
+		Name:        "month",
+		Description: "Month",
+		Required:    true,
+	}, {
+		Type:        discordgo.ApplicationCommandOptionInteger,
+		Name:        "day",
+		Description: "Day",
+		Required:    true,
+	}, {
+		Type:        discordgo.ApplicationCommandOptionInteger,
+		Name:        "hour",
+		Description: "Hour",
+		Required:    true,
+	}, {
+		Type:        discordgo.ApplicationCommandOptionInteger,
+		Name:        "minute",
+		Description: "Minute",
+		Required:    true,
+	}, {
+		Type:        discordgo.ApplicationCommandOptionInteger,
+		Name:        "offset",
+		Description: "Timezone offset from UTC",
+		Required:    true,
+		MinValue:    &gmtOffsetMin,
+		MaxValue:    gmtOffsetMax,
+	}, {
+		Type:        discordgo.ApplicationCommandOptionString,
+		Name:        "region-name",
+		Description: "Name of region",
+		Required:    true,
+		Choices:     CreateDiscordRegionChoices(),
+	}, {
+		Type:        discordgo.ApplicationCommandOptionString,
+		Name:        "duty-name",
+		Description: "Name of duty",
+		Required:    true,
+		Choices:     CreateDiscordDutyChoices(),
+	}},
 }}
 
 type CommandHandler = func(
@@ -73,7 +132,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		duty, exists := getDutyName(i.ApplicationCommandData())
+		duty, exists := getStringValue("duty-name", i.ApplicationCommandData())
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -96,7 +155,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		duty, exists := getDutyName(i.ApplicationCommandData())
+		duty, exists := getStringValue("duty-name", i.ApplicationCommandData())
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -119,7 +178,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		region, exists := getRegionName(i.ApplicationCommandData())
+		region, exists := getStringValue("region-name", i.ApplicationCommandData())
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -142,7 +201,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		region, exists := getRegionName(i.ApplicationCommandData())
+		region, exists := getStringValue("region-name", i.ApplicationCommandData())
 
 		if !exists {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -232,22 +291,52 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 				Content: "Updated the emoji database for this guild",
 			},
 		})
+	},
+	"timezzz": func(
+		s *Server,
+		d *discordgo.Session,
+		i *discordgo.InteractionCreate) {
+		year, yearE := getIntValue("year", i.ApplicationCommandData())
+		month, monthE := getIntValue("month", i.ApplicationCommandData())
+		day, dayE := getIntValue("day", i.ApplicationCommandData())
+		hour, hourE := getIntValue("hour", i.ApplicationCommandData())
+		minute, minuteE := getIntValue("minute", i.ApplicationCommandData())
+		offset, offsetE := getIntValue("offset", i.ApplicationCommandData())
+		duty, dutyE := getStringValue("duty-name", i.ApplicationCommandData())
+		region, regionE := getStringValue("region-name", i.ApplicationCommandData())
+
+		if !yearE || !monthE || !dayE || !hourE || !minuteE || !offsetE || !dutyE || !regionE {
+			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Missing arguments",
+				},
+			})
+		} else {
+			date := time.Date(year, time.Month(month), day, hour-offset, minute, 0, 0, time.UTC)
+			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprintf("%s plans on creating a PF for %s in %s at <t:%d> your time.\n Please react with your roles if you are interested.", i.Member.Mention(), duty, region, date.Unix()),
+				},
+			})
+		}
 	}}
 
-func getDutyName(options discordgo.ApplicationCommandInteractionData) (string, bool) {
+func getStringValue(key string, options discordgo.ApplicationCommandInteractionData) (string, bool) {
 	for _, opt := range options.Options {
-		if opt.Name == "duty-name" && opt.Type == discordgo.ApplicationCommandOptionString {
+		if opt.Name == key && opt.Type == discordgo.ApplicationCommandOptionString {
 			return opt.StringValue(), true
 		}
 	}
 	return "", false
 }
 
-func getRegionName(options discordgo.ApplicationCommandInteractionData) (Region, bool) {
+func getIntValue(key string, options discordgo.ApplicationCommandInteractionData) (int, bool) {
 	for _, opt := range options.Options {
-		if opt.Name == "region-name" && opt.Type == discordgo.ApplicationCommandOptionString {
-			return opt.StringValue(), true
+		if opt.Name == key && opt.Type == discordgo.ApplicationCommandOptionInteger {
+			return int(opt.IntValue()), true
 		}
 	}
-	return "", false
+	return 0, false
 }

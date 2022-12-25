@@ -1,17 +1,11 @@
 package murult
 
 import (
-	"log"
 	"sync"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	_ "github.com/mattn/go-sqlite3"
-)
-
-const (
-	VERSION_KEY   string = "version"
-	VERSION_VALUE string = "24-12-2022"
 )
 
 type Server struct {
@@ -48,7 +42,6 @@ func NewServer(token string) *Server {
 
 	db := NewDb()
 
-	db.CreateStatusTable()
 	db.CreateChannelsTable()
 	db.CreateRegionsTable()
 	db.CreateDutiesTable()
@@ -69,15 +62,24 @@ func NewServer(token string) *Server {
 		db:       db,
 	}
 
-	version, exists := db.SelectStatus(VERSION_KEY)
+	server.registerCommands()
 
-	if !exists || version != VERSION_VALUE {
-		if server.clearCommands() && server.registerCommands() {
-			db.InsertStatus(VERSION_KEY, VERSION_VALUE)
-		} else {
-			return nil
+	session.AddHandler(func(d *discordgo.Session, i *discordgo.ChannelDelete) {
+		Logger.Println("received channel deletion event")
+		server.lock.Lock()
+		defer server.lock.Unlock()
+		server.db.RemoveChannel(i.GuildID, i.ID)
+	})
+	session.AddHandler(func(d *discordgo.Session, i *discordgo.InteractionCreate) {
+		Logger.Printf("received interaction event of type '%s'\n", i.Type.String())
+		server.lock.Lock()
+		defer server.lock.Unlock()
+		if i.Type == discordgo.InteractionApplicationCommand {
+			if cmd, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+				cmd(server, d, i)
+			}
 		}
-	}
+	})
 
 	return server
 }
@@ -103,6 +105,8 @@ func (s *Server) Run(sleep int64) {
 
 		if err != nil {
 			Logger.Printf("Unable to scrape website because '%s'\n", err)
+			s.lock.Unlock()
+			Logger.Printf("Sleeping for %d minutes\n", sleep)
 			time.Sleep(time.Duration(sleep * int64(time.Minute)))
 			continue
 		}
@@ -110,47 +114,23 @@ func (s *Server) Run(sleep int64) {
 		s.SendUpdates(pfState)
 
 		s.lock.Unlock()
+		Logger.Printf("Sleeping for %d minutes\n", sleep)
 		time.Sleep(time.Duration(sleep * int64(time.Minute)))
 	}
 }
 
-func (s *Server) clearCommands() bool {
-	registeredCommands, err := s.session.ApplicationCommands(s.session.State.User.ID, "")
+func (s *Server) registerCommands() bool {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	cmds, err := s.session.ApplicationCommandBulkOverwrite(s.session.State.User.ID, "", Commands)
 
 	if err != nil {
-		log.Printf("Could not fetch registered commands: %v\n", err)
+		Logger.Printf("Cannot create bulk commands because %s\n", err)
 		return false
 	}
 
-	for _, v := range registeredCommands {
-		err := s.session.ApplicationCommandDelete(s.session.State.User.ID, "", v.ID)
-
-		if err != nil {
-			log.Printf("Cannot delete '%s' command because %s\n", v.Name, err)
-			return false
-		}
-
-		Logger.Printf("Deleted command `%s`\n", v.Name)
-	}
-
-	return true
-}
-
-func (s *Server) registerCommands() bool {
-	s.session.AddHandler(func(d *discordgo.Session, i *discordgo.InteractionCreate) {
-		if cmd, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
-			cmd(s, d, i)
-		}
-	})
-
-	for _, v := range Commands {
-		cmd, err := s.session.ApplicationCommandCreate(s.session.State.User.ID, "", v)
-
-		if err != nil {
-			log.Printf("Cannot create '%s' command because %s\n", v.Name, err)
-			return false
-		}
-
+	for _, cmd := range cmds {
 		Logger.Printf("Created command `%s`\n", cmd.Name)
 	}
 
@@ -263,13 +243,15 @@ func (s *Server) SendUpdates(pfState *PfState) {
 	for cid, channel := range s.channels {
 		removedPosts, updatedPosts, newPosts := channel.UpdatePosts(pfState)
 
-		for _, r := range removedPosts {
-			if r.MessageId != "" {
-				err := s.session.ChannelMessageDelete(channel.channelId, r.MessageId)
+		for _, p := range removedPosts {
+			if p.MessageId != "" {
+				err := s.session.ChannelMessageDelete(channel.channelId, p.MessageId)
 
 				if err != nil {
-					Logger.Printf("Discord error cleaning channel because '%s'\n", err)
+					Logger.Printf("Discord error cleaning message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
 				}
+
+				s.db.RemovePost(cid, p.MessageId, p.Creator)
 			}
 		}
 
@@ -278,7 +260,8 @@ func (s *Server) SendUpdates(pfState *PfState) {
 				message, err := s.session.ChannelMessageEdit(cid, p.MessageId, p.Stringify(s.Emojis(channel.guildId)))
 
 				if err != nil {
-					Logger.Printf("Discord error updating message because '%s'\n", err)
+					Logger.Printf("Discord error updating message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
+					s.db.RemovePost(cid, p.MessageId, p.Creator)
 					continue
 				}
 
@@ -292,7 +275,7 @@ func (s *Server) SendUpdates(pfState *PfState) {
 			})
 
 			if err != nil {
-				Logger.Printf("Discord error creating message because '%s'\n", err)
+				Logger.Printf("Discord error creating message in channel '%s' because '%s'\n", channel.channelId, err)
 				continue
 			}
 
