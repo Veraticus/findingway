@@ -28,6 +28,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	path, pathExists := os.LookupEnv("SQLITE_DB")
+
+	if !pathExists {
+		fmt.Println("Please provide SQLITE_DB")
+		os.Exit(1)
+	}
+
 	sleepStr, sleepEnvExists := os.LookupEnv("SLEEP")
 
 	if sleepEnvExists {
@@ -42,7 +49,7 @@ func main() {
 	}
 
 	murult.Logger.Println("Starting server...")
-	server := murult.NewServer(token)
+	server := murult.NewServer(token, path)
 
 	if server == nil {
 		return
