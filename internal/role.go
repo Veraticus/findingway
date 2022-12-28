@@ -10,9 +10,7 @@ type Role struct {
 }
 
 func (rs Role) Emoji(emojis []*discordgo.Emoji) string {
-	if rs.Empty {
-		return EmojiFromStr("any_slot", emojis)
-	} else if rs.Tank && rs.Healer && rs.Dps {
+	if rs.Empty || (rs.Tank && rs.Healer && rs.Dps) {
 		return EmojiFromStr("tank_healer_dps_slot", emojis)
 	}
 	if rs.Tank && rs.Healer && !rs.Dps {
