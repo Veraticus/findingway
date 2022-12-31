@@ -142,7 +142,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 				},
 			})
 		} else {
-			s.AddDuty(i.GuildID, i.ChannelID, duty)
+			go s.AddDuty(i.GuildID, i.ChannelID, duty)
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -165,7 +165,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 				},
 			})
 		} else {
-			s.RemoveDuty(i.ChannelID, duty)
+			go s.RemoveDuty(i.ChannelID, duty)
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -188,7 +188,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 				},
 			})
 		} else {
-			s.AddRegion(i.GuildID, i.ChannelID, region)
+			go s.AddRegion(i.GuildID, i.ChannelID, region)
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -211,7 +211,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 				},
 			})
 		} else {
-			s.RemoveRegion(i.ChannelID, region)
+			go s.RemoveRegion(i.ChannelID, region)
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -284,7 +284,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		s.UpdateEmojis(i.GuildID)
+		go s.UpdateEmojis(i.GuildID)
 		d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
