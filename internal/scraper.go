@@ -17,11 +17,11 @@ func NewScraper(url string) *Scraper {
 }
 
 func (s *Scraper) Scrape() (*PfState, error) {
-	pf := NewPfState()
+	posts := make([]*RawPost, 0)
 	collector := colly.NewCollector()
 
 	collector.OnHTML("#listings.list .listing", func(e *colly.HTMLElement) {
-		post := &Post{Party: []*Slot{}}
+		post := NewRawPost()
 
 		// We can unmarshal a fair amount of information
 		e.Unmarshal(post)
@@ -61,13 +61,14 @@ func (s *Scraper) Scrape() (*PfState, error) {
 				slot.Job = p.Attr("title")
 			}
 
-			post.Party = append(post.Party, slot)
+			post.Slots = append(post.Slots, slot.Emoji())
 		})
 
-		pf.Add(post)
+		posts = append(posts, post)
 	})
 
 	err := collector.Visit(s.Url)
+	pf := NewPfState(posts)
 
 	if err != nil {
 		return nil, err

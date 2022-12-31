@@ -1,7 +1,5 @@
 package murult
 
-import "github.com/bwmarrin/discordgo"
-
 type Role struct {
 	Tank   bool
 	Healer bool
@@ -9,27 +7,27 @@ type Role struct {
 	Empty  bool
 }
 
-func (rs Role) Emoji(emojis []*discordgo.Emoji) string {
+func (rs *Role) Emoji() string {
 	if rs.Empty || (rs.Tank && rs.Healer && rs.Dps) {
-		return EmojiFromStr("tank_healer_dps_slot", emojis)
+		return RoleEmojiTankHealerDps
 	}
 	if rs.Tank && rs.Healer && !rs.Dps {
-		return EmojiFromStr("tank_healer_slot", emojis)
+		return RoleEmojiTankHealer
 	}
 	if rs.Tank && !rs.Healer && rs.Dps {
-		return EmojiFromStr("tank_dps_slot", emojis)
+		return RoleEmojiTankDps
 	}
 	if rs.Tank && !rs.Healer && !rs.Dps {
-		return EmojiFromStr("tank_slot", emojis)
+		return RoleEmojiTank
 	}
 	if !rs.Tank && rs.Healer && rs.Dps {
-		return EmojiFromStr("healer_dps_slot", emojis)
+		return RoleEmojiHealerDps
 	}
 	if !rs.Tank && rs.Healer && !rs.Dps {
-		return EmojiFromStr("healer_slot", emojis)
+		return RoleEmojiHealer
 	}
 	if !rs.Tank && !rs.Healer && rs.Dps {
-		return EmojiFromStr("dps_slot", emojis)
+		return RoleEmojiDps
 	}
 
 	return ":question:"

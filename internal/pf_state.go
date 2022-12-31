@@ -1,47 +1,36 @@
 package murult
 
-import "time"
-
 type PfState struct {
-	posts map[string]*Post
+	posts []*RawPost
 }
 
-func NewPfState() *PfState {
+func NewPfState(posts []*RawPost) *PfState {
 	return &PfState{
-		posts: make(map[string]*Post),
+		posts: posts,
 	}
 }
 
 // GetPosts returns an array of posts that is in the PF.
 // Can be filtered based on the arguments.
-func (pf *PfState) GetPosts(duties []string, regions []Region) map[string]*Post {
-	list := make(map[string]*Post, 0)
+// TODO: Improve this so that we don't have to loop the entire posts for every channel
+func (pf *PfState) GetPosts(duties []string, regions []string) map[string]*RawPost {
+	list := make(map[string]*RawPost, 0)
 
 	for _, post := range pf.posts {
 		for _, region := range regions {
-			worlds := WorldsFromRegion(region)
-			for _, world := range worlds {
+			for _, dc := range DcsFromRegion(region) {
 				for _, duty := range duties {
-					if post.Duty == duty && post.DataCentre == world {
-						oldPost, exists := list[post.Creator]
+					if post.Duty == duty && post.DataCentre == dc {
+						dupPost, exists := list[post.Creator]
 
 						if exists {
-							oldTime, err := oldPost.ExpiresAt()
+							dupTime := dupPost.ExpiresAt()
+							newTime := post.ExpiresAt()
 
-							if err != nil {
-								oldTime = time.Time{}
-							}
-
-							newTime, err := post.ExpiresAt()
-
-							if err != nil {
-								oldTime = time.Time{}
-							}
-
-							if newTime.After(oldTime) {
+							if newTime.After(dupTime) {
 								list[post.Creator] = post
 							} else {
-								list[post.Creator] = oldPost
+								list[post.Creator] = dupPost
 							}
 						} else {
 							list[post.Creator] = post
@@ -53,10 +42,4 @@ func (pf *PfState) GetPosts(duties []string, regions []Region) map[string]*Post 
 	}
 
 	return list
-}
-
-func (pf *PfState) Add(l *Post) {
-	// TODO: Check if we already have this creator
-	// If we do, check which one is the latest one.
-	pf.posts[l.Creator] = l
 }

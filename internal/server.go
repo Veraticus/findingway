@@ -240,38 +240,35 @@ func (c *Server) Emojis(guildId string) []*discordgo.Emoji {
 }
 
 func (s *Server) SendUpdates(pfState *PfState) {
-	for cid, channel := range s.channels {
+	for channelId, channel := range s.channels {
 		removedPosts, updatedPosts, newPosts := channel.UpdatePosts(pfState)
+		channel.posts = make(map[string]*Post, len(updatedPosts)+len(newPosts))
 
 		for _, p := range removedPosts {
-			if p.MessageId != "" {
-				err := s.session.ChannelMessageDelete(channel.channelId, p.MessageId)
+			err := s.session.ChannelMessageDelete(p.ChannelId, p.MessageId)
 
-				if err != nil {
-					Logger.Printf("Discord error cleaning message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
-				}
-
-				s.db.RemovePost(cid, p.MessageId, p.Creator)
+			if err != nil {
+				Logger.Printf("Discord error cleaning message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
 			}
+
+			s.db.RemovePost(p)
 		}
 
 		for _, p := range updatedPosts {
-			if p.MessageId != "" {
-				message, err := s.session.ChannelMessageEdit(cid, p.MessageId, p.Stringify(s.Emojis(channel.guildId)))
+			_, err := s.session.ChannelMessageEdit(channelId, p.MessageId, p.Stringify(s.Emojis(channel.guildId)))
 
-				if err != nil {
-					Logger.Printf("Discord error updating message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
-					s.db.RemovePost(cid, p.MessageId, p.Creator)
-					continue
-				}
-
-				p.MessageId = message.ID
+			if err != nil {
+				Logger.Printf("Discord error updating message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
+				s.db.RemovePost(p)
+				continue
 			}
+
+			channel.posts[p.Creator] = p
 		}
 
-		for _, p := range newPosts {
-			message, err := s.session.ChannelMessageSendComplex(cid, &discordgo.MessageSend{
-				Content: p.Stringify(s.Emojis(channel.guildId)),
+		for _, rp := range newPosts {
+			message, err := s.session.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
+				Content: rp.Stringify(s.Emojis(channel.guildId)),
 			})
 
 			if err != nil {
@@ -279,12 +276,9 @@ func (s *Server) SendUpdates(pfState *PfState) {
 				continue
 			}
 
-			p.MessageId = message.ID
-			s.db.InsertPost(cid, message.ID, p.Creator)
-		}
-
-		if len(removedPosts) != 0 || len(updatedPosts) != 0 || len(newPosts) != 0 {
-			Logger.Printf("Updated listings for channel '%s'\n", cid)
+			p := NewPostFromRawPost(rp, channelId, message.ID)
+			channel.posts[p.Creator] = p
+			s.db.InsertPost(p)
 		}
 	}
 }

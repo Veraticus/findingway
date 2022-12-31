@@ -16,3 +16,11 @@ func NewSlot() *Slot {
 		},
 	}
 }
+
+func (rs *Slot) Emoji() string {
+	if rs.Filled {
+		return rs.Job
+	} else {
+		return rs.Roles.Emoji()
+	}
+}

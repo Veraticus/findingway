@@ -37,7 +37,7 @@ const (
 	RegionJP  Region = "JP"
 )
 
-func WorldsFromRegion(region Region) []string {
+func DcsFromRegion(region Region) []string {
 	if region == RegionNA {
 		return []string{"Aether", "Crystal", "Dynamis", "Primal"}
 	} else if region == RegionEU {

@@ -71,7 +71,7 @@ var Commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{{
 	Type:                     discordgo.ChatApplicationCommand,
 	DefaultMemberPermissions: &permission,
 }, {
-	Name:                     "timezzz",
+	Name:                     "schedule-duty",
 	Description:              "Generate timestamp",
 	Type:                     discordgo.ChatApplicationCommand,
 	DefaultMemberPermissions: &permission,
@@ -292,7 +292,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 			},
 		})
 	},
-	"timezzz": func(
+	"schedule-duty": func(
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
