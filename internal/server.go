@@ -16,6 +16,7 @@ type Server struct {
 	channels map[string]*Channel
 	emojis   map[string][]*discordgo.Emoji
 	db       *Db
+	pfState  *PfState
 }
 
 func NewServer(token, path string) *Server {
@@ -66,14 +67,13 @@ func NewServer(token, path string) *Server {
 
 	session.AddHandler(func(d *discordgo.Session, i *discordgo.ChannelDelete) {
 		Logger.Println("received channel deletion event")
+		server.db.RemoveChannel(i.GuildID, i.ID)
 		server.lock.Lock()
 		defer server.lock.Unlock()
-		server.db.RemoveChannel(i.GuildID, i.ID)
+		delete(server.channels, i.ID)
 	})
 	session.AddHandler(func(d *discordgo.Session, i *discordgo.InteractionCreate) {
 		Logger.Printf("received interaction event of type '%s'\n", i.Type.String())
-		server.lock.Lock()
-		defer server.lock.Unlock()
 		if i.Type == discordgo.InteractionApplicationCommand {
 			if cmd, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
 				cmd(server, d, i)
@@ -85,6 +85,9 @@ func NewServer(token, path string) *Server {
 }
 
 func (s *Server) CloseServer() {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	err := s.db.Close()
 
 	if err != nil {
@@ -111,7 +114,8 @@ func (s *Server) Run(sleep int64) {
 			continue
 		}
 
-		s.SendUpdates(pfState)
+		s.pfState = pfState
+		s.sendUpdates()
 
 		s.lock.Unlock()
 		Logger.Printf("Sleeping for %d minutes\n", sleep)
@@ -138,11 +142,13 @@ func (s *Server) registerCommands() bool {
 }
 
 func (s *Server) AddRegion(guildId, channelId string, region Region) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	channel, exists := s.channels[channelId]
 
 	if exists {
 		channel.regions[region] = struct{}{}
-
 		s.db.InsertRegion(channelId, region)
 	} else {
 		s.channels[channelId] = NewChannel(
@@ -157,9 +163,14 @@ func (s *Server) AddRegion(guildId, channelId string, region Region) {
 		s.db.InsertChannel(guildId, channelId)
 		s.db.InsertRegion(channelId, region)
 	}
+
+	s.sendUpdateToChannel(s.channels[channelId])
 }
 
 func (s *Server) RemoveRegion(channelId string, region Region) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	channel, exists := s.channels[channelId]
 
 	if exists {
@@ -170,10 +181,15 @@ func (s *Server) RemoveRegion(channelId string, region Region) {
 		if len(channel.regions) == 0 {
 			s.db.RemoveChannel(channel.guildId, channelId)
 		}
+
+		s.sendUpdateToChannel(channel)
 	}
 }
 
 func (s *Server) AddDuty(guildId, channelId, duty string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	channel, exists := s.channels[channelId]
 
 	if exists {
@@ -193,9 +209,14 @@ func (s *Server) AddDuty(guildId, channelId, duty string) {
 		s.db.InsertChannel(guildId, channelId)
 		s.db.InsertDuty(channelId, duty)
 	}
+
+	s.sendUpdateToChannel(s.channels[channelId])
 }
 
 func (s *Server) RemoveDuty(channelId, duty string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	channel, exists := s.channels[channelId]
 
 	if exists {
@@ -206,10 +227,15 @@ func (s *Server) RemoveDuty(channelId, duty string) {
 		if len(channel.duties) == 0 {
 			s.db.RemoveChannel(channel.guildId, channelId)
 		}
+
+		s.sendUpdateToChannel(channel)
 	}
 }
 
 func (s *Server) Duties(channelId string) map[string]struct{} {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
 	channel, exists := s.channels[channelId]
 	if exists {
 		return channel.duties
@@ -218,67 +244,77 @@ func (s *Server) Duties(channelId string) map[string]struct{} {
 	}
 }
 
-func (c *Server) UpdateEmojis(guildId string) {
-	emojis, err := c.session.GuildEmojis(guildId)
+func (s *Server) UpdateEmojis(guildId string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	emojis, err := s.session.GuildEmojis(guildId)
 
 	if err != nil {
 		Logger.Printf("Unable to update emojis for '%s'\n", guildId)
 		return
 	}
 
-	c.emojis[guildId] = emojis
+	s.emojis[guildId] = emojis
 }
 
-func (c *Server) Emojis(guildId string) []*discordgo.Emoji {
-	_, exists := c.emojis[guildId]
+func (s *Server) Emojis(guildId string) []*discordgo.Emoji {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	_, exists := s.emojis[guildId]
 
 	if !exists {
-		c.UpdateEmojis(guildId)
+		s.UpdateEmojis(guildId)
 	}
 
-	return c.emojis[guildId]
+	return s.emojis[guildId]
 }
 
-func (s *Server) SendUpdates(pfState *PfState) {
-	for channelId, channel := range s.channels {
-		removedPosts, updatedPosts, newPosts := channel.UpdatePosts(pfState)
-		channel.posts = make(map[string]*Post, len(updatedPosts)+len(newPosts))
+func (s *Server) sendUpdates() {
+	for _, channel := range s.channels {
+		s.sendUpdateToChannel(channel)
+	}
+}
 
-		for _, p := range removedPosts {
-			err := s.session.ChannelMessageDelete(p.ChannelId, p.MessageId)
+func (s *Server) sendUpdateToChannel(channel *Channel) {
+	removedPosts, updatedPosts, newPosts := channel.UpdatePosts(s.pfState)
+	channel.posts = make(map[string]*Post, len(updatedPosts)+len(newPosts))
 
-			if err != nil {
-				Logger.Printf("Discord error cleaning message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
-			}
+	for _, p := range removedPosts {
+		err := s.session.ChannelMessageDelete(p.ChannelId, p.MessageId)
 
+		if err != nil {
+			Logger.Printf("Discord error cleaning message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
+		}
+
+		s.db.RemovePost(p)
+	}
+
+	for _, p := range updatedPosts {
+		_, err := s.session.ChannelMessageEdit(channel.channelId, p.MessageId, p.Stringify(s.Emojis(channel.guildId)))
+
+		if err != nil {
+			Logger.Printf("Discord error updating message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
 			s.db.RemovePost(p)
+			continue
 		}
 
-		for _, p := range updatedPosts {
-			_, err := s.session.ChannelMessageEdit(channelId, p.MessageId, p.Stringify(s.Emojis(channel.guildId)))
+		channel.posts[p.Creator] = p
+	}
 
-			if err != nil {
-				Logger.Printf("Discord error updating message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
-				s.db.RemovePost(p)
-				continue
-			}
+	for _, rp := range newPosts {
+		message, err := s.session.ChannelMessageSendComplex(channel.channelId, &discordgo.MessageSend{
+			Content: rp.Stringify(s.Emojis(channel.guildId)),
+		})
 
-			channel.posts[p.Creator] = p
+		if err != nil {
+			Logger.Printf("Discord error creating message in channel '%s' because '%s'\n", channel.channelId, err)
+			continue
 		}
 
-		for _, rp := range newPosts {
-			message, err := s.session.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
-				Content: rp.Stringify(s.Emojis(channel.guildId)),
-			})
-
-			if err != nil {
-				Logger.Printf("Discord error creating message in channel '%s' because '%s'\n", channel.channelId, err)
-				continue
-			}
-
-			p := NewPostFromRawPost(rp, channelId, message.ID)
-			channel.posts[p.Creator] = p
-			s.db.InsertPost(p)
-		}
+		p := NewPostFromRawPost(rp, channel.channelId, message.ID)
+		channel.posts[p.Creator] = p
+		s.db.InsertPost(p)
 	}
 }
