@@ -295,8 +295,8 @@ func (s *Server) getEmojis(guildId string) []*discordgo.Emoji {
 func (s *Server) sendUpdates() {
 	for _, channel := range s.channels {
 		s.lock.Lock()
-		defer s.lock.Unlock()
 		sleepTime := s.sendUpdateToChannel(channel)
+		s.lock.Unlock()
 		time.Sleep(time.Second * time.Duration(sleepTime) / 2)
 	}
 }
