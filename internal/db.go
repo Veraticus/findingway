@@ -86,6 +86,14 @@ func (db *Db) RemoveChannel(guildId, channelId string) bool {
 	}
 	Logger.Printf("Removed all duties related to channelId='%s'\n", channelId)
 
+	_, err = db.db.Exec("DELETE FROM regions WHERE channelId=?", channelId)
+
+	if err != nil {
+		Logger.Printf("Unable to clear regions with channelId='%s' because '%s'\n", channelId, err)
+		return false
+	}
+	Logger.Printf("Removed all regions related to channelId='%s'\n", channelId)
+
 	_, err = db.db.Exec("DELETE FROM channels WHERE guildId=? AND channelId=?", guildId, channelId)
 
 	if err != nil {

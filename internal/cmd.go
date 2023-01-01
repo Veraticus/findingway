@@ -224,19 +224,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		s *Server,
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
-		channel, exists := s.channels[i.ChannelID]
-
-		if !exists {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "This channel is not registered for this bot",
-				},
-			})
-			return
-		}
-
-		duties := channel.Duties()
+		duties := s.Duties(i.ChannelID)
 
 		if len(duties) == 0 {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -248,9 +236,9 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 			return
 		}
 
-		regions := channel.Regions()
+		regions := s.Regions(i.ChannelID)
 
-		if len(duties) == 0 {
+		if len(regions) == 0 {
 			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
