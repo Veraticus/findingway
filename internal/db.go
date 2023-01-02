@@ -65,7 +65,7 @@ func (db *Db) InsertChannel(guildId, channelId string) bool {
 		return false
 	}
 
-	Logger.Printf("Inserted '(%s, %s)' into channels table\n", guildId, channelId)
+	Logger.Printf("Inserted (guildId='%s', channelId='%s') into channels table\n", guildId, channelId)
 	return true
 }
 
@@ -113,7 +113,7 @@ func (db *Db) InsertRegion(channelId string, region Region) bool {
 		return false
 	}
 
-	Logger.Printf("Inserted '(%s, %s)' into regions table\n", channelId, region)
+	Logger.Printf("Inserted (channelId='%s', region='%s') into regions table\n", channelId, region)
 	return true
 }
 
@@ -125,7 +125,7 @@ func (db *Db) RemoveRegion(channelId, region Region) bool {
 		return false
 	}
 
-	Logger.Printf("Removed '(%s, %s)' from regions table\n", channelId, region)
+	Logger.Printf("Removed (channelId='%s', region='%s') from regions table\n", channelId, region)
 	return true
 }
 
@@ -137,7 +137,7 @@ func (db *Db) InsertDuty(channelId, name string) bool {
 		return false
 	}
 
-	Logger.Printf("Inserted '(%s, %s)' into duties table\n", channelId, name)
+	Logger.Printf("Inserted (channelId='%s', name='%s') into duties table\n", channelId, name)
 	return true
 }
 
@@ -149,7 +149,7 @@ func (db *Db) RemoveDuty(channelId, name string) bool {
 		return false
 	}
 
-	Logger.Printf("Removed '(%s, %s)' from duties table\n", channelId, name)
+	Logger.Printf("Removed (channelId='%s', name='%s') from duties table\n", channelId, name)
 	return true
 }
 

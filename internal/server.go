@@ -17,6 +17,9 @@ type Server struct {
 	emojis   map[string][]*discordgo.Emoji
 	db       *Db
 	pfState  *PfState
+	taskChan chan func()
+	die      bool
+	dieChan  chan bool
 }
 
 func NewServer(token, path string) *Server {
@@ -61,6 +64,9 @@ func NewServer(token, path string) *Server {
 		channels: channels,
 		emojis:   make(map[string][]*discordgo.Emoji),
 		db:       db,
+		die:      false,
+		dieChan:  make(chan bool),
+		taskChan: make(chan func()),
 	}
 
 	server.RegisterCommands()
@@ -85,6 +91,15 @@ func NewServer(token, path string) *Server {
 }
 
 func (s *Server) CloseServer() {
+	Logger.Println("Received signal to die. Cancelling all future jobs")
+
+	s.lock.Lock()
+	s.die = true
+	s.lock.Unlock()
+
+	<-s.dieChan
+	<-s.dieChan
+
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
@@ -101,10 +116,11 @@ func (s *Server) CloseServer() {
 	}
 }
 
-func (s *Server) Run(sleep int64) {
+func (s *Server) StartScrapeJob(sleep int64) {
 	for {
-		s.lock.Lock()
+		Logger.Println("Starting scraping job")
 		pfState, err := s.scraper.Scrape()
+		s.lock.Lock()
 		s.pfState = pfState
 		s.lock.Unlock()
 
@@ -115,10 +131,63 @@ func (s *Server) Run(sleep int64) {
 			continue
 		}
 
-		s.sendUpdates()
+		s.lock.Lock()
+		jobs := make([]func(*Server), 0)
+		for channelId := range s.channels {
+			channel := s.channels[channelId]
+			removedPosts, updatedPosts, newPosts := channel.UpdatePosts(s.pfState)
+
+			for creator := range removedPosts {
+				p := removedPosts[creator]
+				jobs = append(jobs, RemovePostHandler(p))
+				Logger.Printf("Created job to remove duty for '%s' by '%s' in '%s'  in messageId='%s' in channelId='%s'", p.Duty, p.Creator, p.DataCentre, p.MessageId, p.ChannelId)
+			}
+
+			for creator := range updatedPosts {
+				p := updatedPosts[creator]
+				jobs = append(jobs, UpdatePostHandler(p))
+				Logger.Printf("Created job to update duty for '%s' by '%s' in '%s'  in messageId=%s in channelId=%s", p.Duty, p.Creator, p.DataCentre, p.MessageId, p.ChannelId)
+			}
+
+			for creator := range newPosts {
+				rp := newPosts[creator]
+				jobs = append(jobs, CreatePostHandler(channelId, rp))
+				Logger.Printf("Created job to create duty for '%s' by '%s' in '%s' in channelId=%s", rp.Duty, rp.Creator, rp.DataCentre, channel.channelId)
+			}
+
+			Logger.Printf("Created %d jobs for channelId=%s", len(jobs), channel.channelId)
+		}
+		s.lock.Unlock()
+
+		for _, f := range jobs {
+			s.lock.Lock()
+			f(s)
+			s.lock.Unlock()
+		}
 
 		Logger.Printf("Sleeping for %d minutes\n", sleep)
 		time.Sleep(time.Duration(sleep * int64(time.Minute)))
+
+		s.lock.Lock()
+		if s.die {
+			s.lock.Unlock()
+			s.dieChan <- true
+			return
+		}
+		s.lock.Unlock()
+	}
+}
+
+func (s *Server) StartUpdateJob(sleep int64) {
+	for task := range s.taskChan {
+		s.lock.Lock()
+		task()
+		if s.die {
+			s.lock.Unlock()
+			s.dieChan <- true
+			return
+		}
+		s.lock.Unlock()
 	}
 }
 
@@ -172,10 +241,10 @@ func (s *Server) RemoveRegion(channelId string, region Region) {
 
 	if exists {
 		delete(channel.regions, region)
-
 		s.db.RemoveRegion(channelId, region)
 
 		if len(channel.regions) == 0 {
+			delete(s.channels, channelId)
 			s.db.RemoveChannel(channel.guildId, channelId)
 		}
 	}
@@ -189,7 +258,6 @@ func (s *Server) AddDuty(guildId, channelId, duty string) {
 
 	if exists {
 		channel.duties[duty] = struct{}{}
-
 		s.db.InsertDuty(channelId, duty)
 	} else {
 		s.channels[channelId] = NewChannel(
@@ -214,10 +282,10 @@ func (s *Server) RemoveDuty(channelId, duty string) {
 
 	if exists {
 		delete(channel.duties, duty)
-
 		s.db.RemoveDuty(channelId, duty)
 
 		if len(channel.duties) == 0 {
+			delete(s.channels, channelId)
 			s.db.RemoveChannel(channel.guildId, channelId)
 		}
 	}
@@ -292,62 +360,109 @@ func (s *Server) getEmojis(guildId string) []*discordgo.Emoji {
 	return s.emojis[guildId]
 }
 
-func (s *Server) sendUpdates() {
-	for _, channel := range s.channels {
-		s.lock.Lock()
-		sleepTime := s.sendUpdateToChannel(channel)
-		s.lock.Unlock()
-		time.Sleep(time.Second * time.Duration(sleepTime) / 2)
+func RemovePostHandler(p *Post) func(*Server) {
+	return func(s *Server) {
+		Logger.Printf("Executing job to remove duty for '%s' by '%s' in '%s'  in messageId='%s' in channelId='%s'\n", p.Duty, p.Creator, p.DataCentre, p.MessageId, p.ChannelId)
+
+		channel, exists := s.channels[p.ChannelId]
+		if !exists {
+			Logger.Printf("Attempting to delete a post from channelId='%s' but the channel is already deleted\n", p.ChannelId)
+			return
+		}
+
+		_, exists = channel.posts[p.Creator]
+
+		if !exists {
+			Logger.Printf("Attempting to delete a post from channelId='%s' but the post is already deleted\n", p.ChannelId)
+			return
+		}
+
+		if exists {
+			err := s.session.ChannelMessageDelete(p.ChannelId, p.MessageId)
+
+			if err != nil {
+				Logger.Printf("Discord error cleaning message '%s' in channelId='%s' because '%s'\n", p.MessageId, channel.channelId, err)
+			}
+
+			delete(channel.posts, p.Creator)
+			s.db.RemovePost(p)
+			Logger.Println("Job done")
+		}
 	}
 }
 
-func (s *Server) sendUpdateToChannel(channel *Channel) int {
-	count := 0
-	Logger.Printf("starting to send updates to channelId=%s", channel.channelId)
-	removedPosts, updatedPosts, newPosts := channel.UpdatePosts(s.pfState)
-	channel.posts = make(map[string]*Post, len(updatedPosts)+len(newPosts))
+func UpdatePostHandler(p *Post) func(*Server) {
+	return func(s *Server) {
+		Logger.Printf("Executing job to update duty for '%s' by '%s' in '%s'  in messageId='%s' in channelId='%s'", p.Duty, p.Creator, p.DataCentre, p.MessageId, p.ChannelId)
 
-	for _, p := range removedPosts {
-		err := s.session.ChannelMessageDelete(p.ChannelId, p.MessageId)
-		count++
-
-		if err != nil {
-			Logger.Printf("Discord error cleaning message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
+		channel, exists := s.channels[p.ChannelId]
+		if !exists {
+			Logger.Printf("Attempting to update a post from channelId='%s' but the channel is already deleted\n", p.ChannelId)
+			return
 		}
 
-		s.db.RemovePost(p)
-	}
+		_, exists = channel.posts[p.Creator]
 
-	for _, p := range updatedPosts {
+		if !exists {
+			Logger.Printf("Attempting to update a post from channelId='%s' but the post is already deleted\n", p.ChannelId)
+			return
+		}
+
 		_, err := s.session.ChannelMessageEdit(channel.channelId, p.MessageId, p.Stringify(s.getEmojis(channel.guildId)))
-		count++
 
 		if err != nil {
-			Logger.Printf("Discord error updating message '%s' in channel '%s' because '%s'\n", p.MessageId, channel.channelId, err)
+			Logger.Printf("Discord error updating messageId='%s' in channelId='%s' because '%s'\n", p.MessageId, channel.channelId, err)
 			s.db.RemovePost(p)
-			continue
+			return
 		}
 
 		channel.posts[p.Creator] = p
 		s.db.InsertPost(p)
+		Logger.Println("Job done")
 	}
+}
 
-	for _, rp := range newPosts {
-		message, err := s.session.ChannelMessageSendComplex(channel.channelId, &discordgo.MessageSend{
-			Content: rp.Stringify(s.getEmojis(channel.guildId)),
-		})
-		count++
+func CreatePostHandler(channelId string, rp *RawPost) func(*Server) {
+	return func(s *Server) {
+		Logger.Printf("Executing job to create duty for '%s' by '%s' in '%s'  in channelId=%s", rp.Duty, rp.Creator, rp.DataCentre, channelId)
 
-		if err != nil {
-			Logger.Printf("Discord error creating message in channel '%s' because '%s'\n", channel.channelId, err)
-			continue
+		channel, exists := s.channels[channelId]
+
+		if !exists {
+			Logger.Printf("Attempting to create a post from channelId='%s' but the channel is already deleted\n", channelId)
+			return
 		}
 
-		p := NewPostFromRawPost(rp, channel.channelId, message.ID)
-		channel.posts[p.Creator] = p
-		s.db.InsertPost(p)
-	}
+		p, exists := channel.posts[rp.Creator]
 
-	Logger.Printf("finished sending updates to channelId=%s", channel.channelId)
-	return count
+		if exists {
+			Logger.Printf("Attempting to create a post from channelId='%s' but creator='%s' already have a post. So we will update the old post instead\n", channel.channelId, rp.Creator)
+
+			_, err := s.session.ChannelMessageEdit(channel.channelId, p.MessageId, p.Stringify(s.getEmojis(channel.guildId)))
+
+			if err != nil {
+				Logger.Printf("Discord error updating messageId='%s' in channelId='%s' because '%s'\n", p.MessageId, channel.channelId, err)
+				s.db.RemovePost(p)
+				return
+			}
+
+			channel.posts[p.Creator] = p
+			s.db.InsertPost(p)
+		} else {
+			message, err := s.session.ChannelMessageSendComplex(channel.channelId, &discordgo.MessageSend{
+				Content: rp.Stringify(s.getEmojis(channel.guildId)),
+			})
+
+			if err != nil {
+				Logger.Printf("Discord error creating message in channelId='%s' because '%s'\n", channel.channelId, err)
+				s.db.RemovePost(p)
+				return
+			}
+
+			p := NewPostFromRawPost(rp, channel.channelId, message.ID)
+			channel.posts[p.Creator] = p
+			s.db.InsertPost(p)
+		}
+		Logger.Println("Job done")
+	}
 }

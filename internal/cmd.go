@@ -225,28 +225,7 @@ var CommandHandlers map[string]CommandHandler = map[string]CommandHandler{
 		d *discordgo.Session,
 		i *discordgo.InteractionCreate) {
 		duties := s.Duties(i.ChannelID)
-
-		if len(duties) == 0 {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "This channel is not tracking any duties",
-				},
-			})
-			return
-		}
-
 		regions := s.Regions(i.ChannelID)
-
-		if len(regions) == 0 {
-			d.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "This channel is not tracking any regions",
-				},
-			})
-			return
-		}
 
 		var respond strings.Builder
 		respond.WriteString("We are currently tracking the following duties:\n")

@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 
 	murult "github.com/yuyuriyuri/trappingway-go/internal"
 )
@@ -55,6 +57,12 @@ func main() {
 		return
 	}
 
-	defer server.CloseServer()
-	server.Run(sleep)
+	go server.StartScrapeJob(sleep)
+	go server.StartUpdateJob(sleep)
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	<-c
+	server.CloseServer()
+	os.Exit(1)
 }
