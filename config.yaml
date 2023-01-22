@@ -38,4 +38,15 @@ channels:
 - id: "1037081714683547718" # UDR dsr pf check
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Dynamis]
-
+- id: "1061465824780628038" # TOP aether
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Aether]
+- id: "1061465841843044393" # TOP primal
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Primal]
+- id: "1061465854748926012" # TOP crystal
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Crystal]
+- id: "1061465866039984238" # TOP dynamis
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Dynamis]
