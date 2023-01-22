@@ -50,3 +50,6 @@ channels:
 - id: "1061465866039984238" # TOP dynamis
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Dynamis]
+- id: "989246090463313941" # UAR top-check
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Aether]

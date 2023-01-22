@@ -73,11 +73,22 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 		}
 	}
 
+	dataCentresString := ""
+	if len(dataCentres) == 1 {
+		dataCentresString = dataCentres[0]
+	} else if len(dataCentres) > 1 {
+		dataCentresString = strings.Join(dataCentres, ", ")
+	}
+
 	headerEmbed := &discordgo.MessageEmbed{
-		Title:       fmt.Sprintf("%s PFs", duty),
-		Type:        discordgo.EmbedTypeRich,
-		Color:       0x6600ff,
-		Description: fmt.Sprintf("Found %v listings %v", len(scopedListings.Listings), fmt.Sprintf("<t:%v:R>", time.Now().Unix())),
+		Title: fmt.Sprintf("%s PFs (%v)", duty, dataCentresString),
+		Type:  discordgo.EmbedTypeRich,
+		Color: 0x6600ff,
+		Description: fmt.Sprintf(
+			"Found %v listings %v",
+			len(scopedListings.Listings),
+			fmt.Sprintf("<t:%v:R>", time.Now().Unix()),
+		),
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: strings.Repeat("\u3000", 20),
 		},
