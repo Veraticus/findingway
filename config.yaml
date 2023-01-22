@@ -26,6 +26,9 @@ channels:
 - id: "1003797214491066498" # UPR dsr pf check
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Primal]
+- id: "1066846031867809894" # UPR top pf check
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Primal]
 - id: "1037081516523651132" # UDR ucob pf check
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Dynamis]
