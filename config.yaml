@@ -56,3 +56,18 @@ channels:
 - id: "989246280461074512" # UAR top-check
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether]
+- id: "1106427289908035654" # Mala top check
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Aether]
+- id: "1106427303573065818" # Mala dsr check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Aether]
+- id: "1106427382392442941" # Mala tea check
+  duty: "The Epic of Alexander (Ultimate)"
+  dataCentres: [Aether]
+- id: "1106427321893793853" # Mala uwu check
+  duty: "The Weapon's Refrain (Ultimate)"
+  dataCentres: [Aether]
+- id: "1106427345746804757" # Mala ucob check
+  duty: "The Unending Coil of Bahamut (Ultimate)"
+  dataCentres: [Aether]
