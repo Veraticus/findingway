@@ -71,6 +71,18 @@ channels:
 - id: "1106427345746804757" # Mala ucob check
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Aether]
+- id: "1112960917051809792" # Mala pf check 1
+  duty: "Abyssos: The Ninth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1112960959196176474" # Mala pf check 2
+  duty: "Abyssos: The Tenth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1112960989508403300" # Mala pf check 3
+  duty: "Abyssos: The Eleventh Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1112961011788566558"  # Mala pf check 4
+  duty: "Abyssos: The Twelfth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
 - id: "1106508173717807144" # reprise41 top check
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether]
