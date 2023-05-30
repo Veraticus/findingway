@@ -3,16 +3,16 @@ channels:
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Aether]
 - id: "1009566968396922951" # NPS pf check 1
-  duty: "Abyssos: The Fifth Circle (Savage)"
+  duty: "Abyssos: The Ninth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
 - id: "1009567736650801293" # NPS pf check 2
-  duty: "Abyssos: The Sixth Circle (Savage)"
+  duty: "Abyssos: The Tenth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
 - id: "1009568748438556832" # NPS pf check 3
-  duty: "Abyssos: The Seventh Circle (Savage)"
+  duty: "Abyssos: The Eleventh Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
 - id: "1009568848636293250"  # NPS pf check 4
-  duty: "Abyssos: The Eighth Circle (Savage)"
+  duty: "Abyssos: The Twelfth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
 - id: "1003797164222337094" # UPR ucob pf check
   duty: "The Unending Coil of Bahamut (Ultimate)"
