@@ -98,3 +98,15 @@ channels:
 - id: "1116801110292828243" # reprise41 ucob check
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Aether]
+- id: "1120053963673309245" # Savage Learning Academy p9s
+  duty: "Anabaseios: The Ninth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1120053976369471539" # Savage Learning Academy p10s
+  duty: "Anabaseios: The Tenth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1120053989896097882" # Savage Learning Academy p11s
+  duty: "Anabaseios: The Eleventh Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1120054005419221063" # Savage Learning Academy p12s
+  duty: "Anabaseios: The Twelfth Circle (Savage)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
