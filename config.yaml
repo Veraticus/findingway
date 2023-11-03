@@ -83,21 +83,6 @@ channels:
 - id: "1112961011788566558"  # Mala pf check 4
   duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1116800975378858044" # reprise41 top check
-  duty: "The Omega Protocol (Ultimate)"
-  dataCentres: [Aether]
-- id: "1116801002578923541" # reprise41 dsr check
-  duty: "Dragonsong's Reprise (Ultimate)"
-  dataCentres: [Aether]
-- id: "1116801042475130890" # reprise41 tea check
-  duty: "The Epic of Alexander (Ultimate)"
-  dataCentres: [Aether]
-- id: "1116801078063800446" # reprise41 uwu check
-  duty: "The Weapon's Refrain (Ultimate)"
-  dataCentres: [Aether]
-- id: "1116801110292828243" # reprise41 ucob check
-  duty: "The Unending Coil of Bahamut (Ultimate)"
-  dataCentres: [Aether]
 - id: "1120053963673309245" # Savage Learning Academy p9s
   duty: "Anabaseios: The Ninth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
