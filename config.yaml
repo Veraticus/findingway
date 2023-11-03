@@ -110,3 +110,18 @@ channels:
 - id: "1120054005419221063" # Savage Learning Academy p12s
   duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1168327640638296065" # golden sheep top check
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1168327674708631633" # golden sheep dsr check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1168327701694783498" # golden sheep tea check
+  duty: "The Epic of Alexander (Ultimate)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1168327733357576283" # golden sheep uwu check
+  duty: "The Weapon's Refrain (Ultimate)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1168327757374181446" # golden sheep ucob check
+  duty: "The Unending Coil of Bahamut (Ultimate)"
+  dataCentres: [Aether, Crystal, Primal, Dynamis]
