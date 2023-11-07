@@ -53,6 +53,18 @@ channels:
 - id: "1061465866039984238" # TOP dynamis
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Dynamis]
+- id: "989246195857756220" # UAR uwu-check
+  duty: "The Weapon's Refrain (Ultimate)"
+  dataCentres: [Aether]
+- id: "989246217076736030" # UAR ucob-check
+  duty: "The Unending Coil of Bahamut (Ultimate)"
+  dataCentres: [Aether]
+- id: "989246232994140242" # UAR tea-check
+  duty: "The Epic of Alexander (Ultimate)"
+  dataCentres: [Aether]
+- id: "989246259359547402" # UAR dru-check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Aether]
 - id: "989246280461074512" # UAR top-check
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether]
