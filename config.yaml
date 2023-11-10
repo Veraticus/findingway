@@ -122,3 +122,123 @@ channels:
 - id: "1168327757374181446" # golden sheep ucob check
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
+- id: "1172326220352987257" # raidingway aether ucob check
+  duty: "The Unending Coil of Bahamut (Ultimate)"
+  dataCentres: [Aether]
+- id: "1172326251118198814" # raidingway aether uwu check
+  duty: "The Weapon's Refrain (Ultimate)"
+  dataCentres: [Aether]
+- id: "1172326284257407027" # raidingway aether tea check
+  duty: "The Epic of Alexander (Ultimate)"
+  dataCentres: [Aether]
+- id: "1172326306847920150" # raidingway aether dsr check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Aether]
+- id: "1172326326645051412" # raidingway aether top check
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Aether]
+- id: "1172327931767427072" # raidingway aether p9s check
+  duty: "Anabaseios: The Ninth Circle (Savage)"
+  dataCentres: [Aether]
+- id: "1172327947668045885" # raidingway aether p10s check
+  duty: "Anabaseios: The Tenth Circle (Savage)"
+  dataCentres: [Aether]
+- id: "1172327961622487070" # raidingway aether p11s check
+  duty: "Anabaseios: The Eleventh Circle (Savage)"
+  dataCentres: [Aether]
+- id: "1172327983952953445" # raidingway aether p12s check
+  duty: "Anabaseios: The Twelfth Circle (Savage)"
+  dataCentres: [Aether]
+- id: "1172328090836406415" # raidingway aether zeromus
+  duty: "The Abyssal Fracture (Extreme)"
+  dataCentres: [Aether]
+- id: "1172330360474968084" # raidingway crystal ucob check
+  duty: "The Unending Coil of Bahamut (Ultimate)"
+  dataCentres: [Crystal]
+- id: "1172330411104407642" # raidingway crystal uwu check
+  duty: "The Weapon's Refrain (Ultimate)"
+  dataCentres: [Crystal]
+- id: "1172330431958499410" # raidingway crystal tea check
+  duty: "The Epic of Alexander (Ultimate)"
+  dataCentres: [Crystal]
+- id: "1172330445300568105" # raidingway crystal dsr check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Crystal]
+- id: "1172330456289652858" # raidingway crystal top check
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Crystal]
+- id: "1172330512891781210" # raidingway crystal p9s check
+  duty: "Anabaseios: The Ninth Circle (Savage)"
+  dataCentres: [Crystal]
+- id: "1172330529698353322" # raidingway crystal p10s check
+  duty: "Anabaseios: The Tenth Circle (Savage)"
+  dataCentres: [Crystal]
+- id: "1172330540117016597" # raidingway crystal p11s check
+  duty: "Anabaseios: The Eleventh Circle (Savage)"
+  dataCentres: [Crystal]
+- id: "1172330551261265951" # raidingway crystal p12s check
+  duty: "Anabaseios: The Twelfth Circle (Savage)"
+  dataCentres: [Crystal]
+- id: "1172330629749293169" # raidingway crystal zeromus
+  duty: "The Abyssal Fracture (Extreme)"
+  dataCentres: [Crystal]
+- id: "1172330964572176386" # raidingway dynamis ucob check
+  duty: "The Unending Coil of Bahamut (Ultimate)"
+  dataCentres: [Dynamis]
+- id: "1172330991587692585" # raidingway dynamis uwu check
+  duty: "The Weapon's Refrain (Ultimate)"
+  dataCentres: [Dynamis]
+- id: "1172331006292938802" # raidingway dynamis tea check
+  duty: "The Epic of Alexander (Ultimate)"
+  dataCentres: [Dynamis]
+- id: "1172331029026062357" # raidingway dynamis dsr check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Dynamis]
+- id: "1172331043802599434" # raidingway dynamis top check
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Dynamis]
+- id: "1172331185343582208" # raidingway dynamis p9s check
+  duty: "Anabaseios: The Ninth Circle (Savage)"
+  dataCentres: [Dynamis]
+- id: "1172331212698832907" # raidingway dynamis p10s check
+  duty: "Anabaseios: The Tenth Circle (Savage)"
+  dataCentres: [Dynamis]
+- id: "1172331227898978334" # raidingway dynamis p11s check
+  duty: "Anabaseios: The Eleventh Circle (Savage)"
+  dataCentres: [Dynamis]
+- id: "1172331199751008286" # raidingway dynamis p12s check
+  duty: "Anabaseios: The Twelfth Circle (Savage)"
+  dataCentres: [Dynamis]
+- id: "1172331314461016114" # raidingway dynamis zeromus
+  duty: "The Abyssal Fracture (Extreme)"
+  dataCentres: [Dynamis]
+- id: "1172332940781441104" # raidingway primal ucob check
+  duty: "The Unending Coil of Bahamut (Ultimate)"
+  dataCentres: [Primal]
+- id: "1172332955478274118" # raidingway primal uwu check
+  duty: "The Weapon's Refrain (Ultimate)"
+  dataCentres: [Primal]
+- id: "1172332996104298587" # raidingway primal tea check
+  duty: "The Epic of Alexander (Ultimate)"
+  dataCentres: [Primal]
+- id: "1172333014538276945" # raidingway primal dsr check
+  duty: "Dragonsong's Reprise (Ultimate)"
+  dataCentres: [Primal]
+- id: "1172333025942585374" # raidingway primal top check
+  duty: "The Omega Protocol (Ultimate)"
+  dataCentres: [Primal]
+- id: "1172333109589585920" # raidingway primal p9s check
+  duty: "Anabaseios: The Ninth Circle (Savage)"
+  dataCentres: [Primal]
+- id: "1172333119626543166" # raidingway primal p10s check
+  duty: "Anabaseios: The Tenth Circle (Savage)"
+  dataCentres: [Primal]
+- id: "1172333133035753553" # raidingway primal p11s check
+  duty: "Anabaseios: The Eleventh Circle (Savage)"
+  dataCentres: [Primal]
+- id: "1172333144511352832" # raidingway primal p12s check
+  duty: "Anabaseios: The Twelfth Circle (Savage)"
+  dataCentres: [Primal]
+- id: "1172333202476634142" # raidingway primal zeromus
+  duty: "The Abyssal Fracture (Extreme)"
+  dataCentres: [Primal]
