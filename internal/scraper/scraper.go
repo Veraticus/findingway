@@ -3,7 +3,7 @@ package scraper
 import (
 	"strings"
 
-	"github.com/Veraticus/trappingway/internal/ffxiv"
+	"github.com/Veraticus/findingway/internal/ffxiv"
 
 	"github.com/gocolly/colly"
 )

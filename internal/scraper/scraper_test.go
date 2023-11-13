@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Veraticus/trappingway/internal/ffxiv"
+	"github.com/Veraticus/findingway/internal/ffxiv"
 
 	"github.com/stretchr/testify/assert"
 )

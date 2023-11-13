@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Veraticus/trappingway/internal/ffxiv"
+	"github.com/Veraticus/findingway/internal/ffxiv"
 
 	"github.com/bwmarrin/discordgo"
 )

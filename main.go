@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Veraticus/trappingway/internal/discord"
-	"github.com/Veraticus/trappingway/internal/scraper"
+	"github.com/Veraticus/findingway/internal/discord"
+	"github.com/Veraticus/findingway/internal/scraper"
 
 	"gopkg.in/yaml.v2"
 )
@@ -41,7 +41,7 @@ func main() {
 
 	scraper := scraper.New("https://xivpf.com")
 
-	fmt.Printf("Starting Trappingway...\n")
+	fmt.Printf("Starting findingway...\n")
 	for {
 		fmt.Printf("Scraping source...\n")
 		err := scraper.Scrape()

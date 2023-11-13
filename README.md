@@ -1,26 +1,26 @@
-# trappingway
+# findingway
 
-Inspired and indebted to the [Rust project of the same name](https://github.com/epitaque/trappingway/) by [epitaque](https://github.com/epitaque). You can see it in action in [Aether PUG DSR](https://discord.gg/aetherpugdsr) in the #pf-checks channel.
+Inspired and indebted to the [Rust project of the same name](https://github.com/epitaque/findingway/) by [epitaque](https://github.com/epitaque). You can see it in action in [Aether PUG DSR](https://discord.gg/aetherpugdsr) in the #pf-checks channel.
 
-Trappingway scrapes https://xivpf.com/listings every 3 minutes, collects the resulting listings, and posts them onto a Discord channel of your choice. Note that xivpf.com is not particularly accurate and includes private listings; there does not seem to be a way to segment them out at the current time.
+findingway scrapes https://xivpf.com/listings every 3 minutes, collects the resulting listings, and posts them onto a Discord channel of your choice. Note that xivpf.com is not particularly accurate and includes private listings; there does not seem to be a way to segment them out at the current time.
 
 ## Running
 
-Trappingway ingests its configuration file at `./config.yaml` to determine what to parse.
+findingway ingests its configuration file at `./config.yaml` to determine what to parse.
 
-Trappingway requires one environment variable to start:
+findingway requires one environment variable to start:
 
-* **DISCORD_TOKEN**: You have to create a [Discord bot for Trappingway](https://discord.com/developers/applications). Once you've done so, you can add the bot token here.
+* **DISCORD_TOKEN**: You have to create a [Discord bot for findingway](https://discord.com/developers/applications). Once you've done so, you can add the bot token here.
 
-Trapping also accepts one optional environment variable:
+findingway also accepts one optional environment variable:
 
-* **ONCE**: If present, Trappingway will run only once and then exit successfully. Otherwise it will run perpetually and update the target channel every three minutes.
+* **ONCE**: If present, findingway will run only once and then exit successfully. Otherwise it will run perpetually and update the target channel every three minutes.
 
-I'm not totally sure if Trappingway can "just run" in other Discords, even if added. The emojis it uses are present only in APD, and bots can't always use emojis across Discords. If it can't be run in other Discords, I can create a configuration file for mapping roles and jobs to emojis -- someone just open an issue and let me know.
+I'm not totally sure if findingway can "just run" in other Discords, even if added. The emojis it uses are present only in APD, and bots can't always use emojis across Discords. If it can't be run in other Discords, I can create a configuration file for mapping roles and jobs to emojis -- someone just open an issue and let me know.
 
 ## Deployment
 
-The repository automatically builds Docker images; you can access them if you want to run Trappingway in your own Discord.
+The repository automatically builds Docker images; you can access them if you want to run findingway in your own Discord.
 
 I run this in Fargate for Aether PUG DSR. Here's a task definition you might find useful:
 
@@ -36,7 +36,7 @@ I run this in Fargate for Aether PUG DSR. Here's a task definition you might fin
         "logDriver": "awslogs",
         "secretOptions": null,
         "options": {
-          "awslogs-group": "/ecs/trappingway",
+          "awslogs-group": "/ecs/findingway",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
         }
@@ -75,7 +75,7 @@ I run this in Fargate for Aether PUG DSR. Here's a task definition you might fin
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "ghcr.io/veraticus/trappingway:main",
+      "image": "ghcr.io/veraticus/findingway:main",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
@@ -92,7 +92,7 @@ I run this in Fargate for Aether PUG DSR. Here's a task definition you might fin
       "dockerLabels": null,
       "systemControls": null,
       "privileged": null,
-      "name": "trappingway"
+      "name": "findingway"
     }
   ],
   "placementConstraints": [],
@@ -102,8 +102,8 @@ I run this in Fargate for Aether PUG DSR. Here's a task definition you might fin
     "EC2",
     "FARGATE"
   ],
-  "taskDefinitionArn": "arn:aws:ecs:us-east-1:AWS_ACCOUNT_ID:task-definition/trappingway:1",
-  "family": "trappingway",
+  "taskDefinitionArn": "arn:aws:ecs:us-east-1:AWS_ACCOUNT_ID:task-definition/findingway:1",
+  "family": "findingway",
   "requiresAttributes": [
     {
       "targetId": null,
