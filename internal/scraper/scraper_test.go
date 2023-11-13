@@ -1,9 +1,9 @@
 package scraper
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/Veraticus/findingway/internal/ffxiv"
@@ -14,7 +14,7 @@ import (
 func newTestServer() (*httptest.Server, error) {
 	mux := http.NewServeMux()
 
-	listings, err := ioutil.ReadFile("testdata/listings.html")
+	listings, err := os.ReadFile("testdata/listings.html")
 	if err != nil {
 		return nil, err
 	}
@@ -29,15 +29,16 @@ func newTestServer() (*httptest.Server, error) {
 
 func TestGetListings(t *testing.T) {
 	ts, err := newTestServer()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	defer ts.Close()
 
-	s := New(ts.URL)
-	s.Scrape()
+	s := &Scraper{Url: ts.URL}
+	listings, err := s.Scrape()
+	assert.NoError(t, err)
 
-	assert.Equal(t, 650, len(s.Listings.Listings))
+	assert.Equal(t, 656, len(listings.Listings))
 
-	listing := s.Listings.Listings[100]
+	listing := listings.Listings[100]
 	assert.Equal(t, listing.Duty, "The Unending Coil of Bahamut (Ultimate)")
 	assert.Equal(t, listing.Party[0].Job, ffxiv.AST)
 	assert.True(t, listing.Party[0].Filled)

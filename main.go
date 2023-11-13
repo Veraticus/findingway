@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"sync"
 	"time"
@@ -27,7 +26,7 @@ func main() {
 		Token: discordToken,
 	}
 
-	config, err := ioutil.ReadFile("./config.yaml")
+	config, err := os.ReadFile("./config.yaml")
 	if err != nil {
 		panic(fmt.Errorf("Could not read config.yaml: %w", err))
 	}
@@ -39,12 +38,12 @@ func main() {
 		panic(fmt.Errorf("Could not instantiate Discord: %f", err))
 	}
 
-	scraper := scraper.New("https://xivpf.com")
+	scraper := &scraper.Scraper{Url: "https://xivpf.com"}
 
 	fmt.Printf("Starting findingway...\n")
 	for {
 		fmt.Printf("Scraping source...\n")
-		err := scraper.Scrape()
+		listings, err := scraper.Scrape()
 		if err != nil {
 			fmt.Printf("Scraper error: %f\n", err)
 			continue
@@ -61,7 +60,7 @@ func main() {
 				}
 
 				fmt.Printf("Updating Discord for %v...\n", c.Duty)
-				err = d.PostListings(c.ID, scraper.Listings, c.Duty, c.DataCentres)
+				err = d.PostListings(c.ID, listings, c.Duty, c.DataCentres)
 				if err != nil {
 					fmt.Printf("Discord error updating messagea: %f\n", err)
 				}

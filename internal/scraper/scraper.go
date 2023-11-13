@@ -1,29 +1,23 @@
 package scraper
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Veraticus/findingway/internal/ffxiv"
 
-	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/v2"
 )
 
 type Scraper struct {
-	Url      string
-	Listings *ffxiv.Listings
+	Url string
 }
 
-func New(url string) *Scraper {
-	return &Scraper{
-		Url:      url,
-		Listings: &ffxiv.Listings{Listings: []*ffxiv.Listing{}},
-	}
-}
-
-func (s *Scraper) Scrape() error {
+func (s *Scraper) Scrape() (*ffxiv.Listings, error) {
 	listings := &ffxiv.Listings{}
 
 	c := colly.NewCollector()
+	errors := []error{}
 
 	c.OnHTML("#listings.list .listing", func(e *colly.HTMLElement) {
 		listing := &ffxiv.Listing{Party: []*ffxiv.Slot{}}
@@ -34,6 +28,7 @@ func (s *Scraper) Scrape() error {
 		// Get attributes which are unmarshall-able
 		listing.DataCentre = e.Attr("data-centre")
 		listing.PfCategory = e.Attr("data-pf-category")
+		listing.Id = e.Attr("data-id")
 
 		// Get everything else that isn't easily inferred; first description
 		description := e.ChildText(".left .description")
@@ -71,10 +66,11 @@ func (s *Scraper) Scrape() error {
 
 		listings.Add(listing)
 	})
-
 	c.Visit(s.Url + "/listings")
 
-	s.Listings = listings
+	if len(errors) > 0 {
+		return nil, fmt.Errorf("Could not scrape listings: %w", errors[0])
+	}
 
-	return nil
+	return listings, nil
 }

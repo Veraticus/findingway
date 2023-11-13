@@ -14,6 +14,7 @@ type Listings struct {
 
 type Listing struct {
 	DataCentre  string
+	Id          string
 	PfCategory  string
 	Duty        string `selector:".left .duty"`
 	Tags        string `selector:".left .description span"`
@@ -92,7 +93,7 @@ func (ls *Listings) UpdatedWithinLast(duration time.Duration) (*Listings, error)
 
 func (ls *Listings) Add(l *Listing) {
 	for _, existingListing := range ls.Listings {
-		if existingListing.Creator == l.Creator {
+		if existingListing.Id == l.Id {
 			return
 		}
 	}
