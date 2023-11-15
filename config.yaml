@@ -152,6 +152,9 @@ channels:
 - id: "1172328090836406415" # raidingway aether zeromus
   duty: "The Abyssal Fracture (Extreme)"
   dataCentres: [Aether]
+- id: "1174341288678662215" # raidingway aether king thordan
+  duty: "The Singularity Reactor (Unreal)"
+  dataCentres: [Aether]
 - id: "1172330360474968084" # raidingway crystal ucob check
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Crystal]
@@ -181,6 +184,9 @@ channels:
   dataCentres: [Crystal]
 - id: "1172330629749293169" # raidingway crystal zeromus
   duty: "The Abyssal Fracture (Extreme)"
+  dataCentres: [Crystal]
+- id: "1174341478194102282" # raidingway crystal king thordan
+  duty: "The Singularity Reactor (Unreal)"
   dataCentres: [Crystal]
 - id: "1172330964572176386" # raidingway dynamis ucob check
   duty: "The Unending Coil of Bahamut (Ultimate)"
@@ -212,6 +218,9 @@ channels:
 - id: "1172331314461016114" # raidingway dynamis zeromus
   duty: "The Abyssal Fracture (Extreme)"
   dataCentres: [Dynamis]
+- id: "1174342061915389992" # raidingway dynamis king thordan
+  duty: "The Singularity Reactor (Unreal)"
+  dataCentres: [Dynamis]
 - id: "1172332940781441104" # raidingway primal ucob check
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Primal]
@@ -241,4 +250,7 @@ channels:
   dataCentres: [Primal]
 - id: "1172333202476634142" # raidingway primal zeromus
   duty: "The Abyssal Fracture (Extreme)"
+  dataCentres: [Primal]
+- id: "1174342335404986469" # raidingway primal king thordan
+  duty: "The Singularity Reactor (Unreal)"
   dataCentres: [Primal]
