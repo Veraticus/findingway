@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ func main() {
 	if !ok {
 		once = "false"
 	}
+	discordToken = strings.TrimSpace(discordToken)
 
 	d := &discord.Discord{
 		Token: discordToken,
