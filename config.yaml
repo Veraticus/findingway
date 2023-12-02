@@ -1,8 +1,6 @@
 channels:
 - id: "991199065196990585" # APD PF check
   duty: "Dragonsong's Reprise (Ultimate)"
-  dataCentres: [Aether]
-  duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
 - id: "1003797164222337094" # UPR ucob pf check
   duty: "The Unending Coil of Bahamut (Ultimate)"
