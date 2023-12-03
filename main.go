@@ -50,26 +50,23 @@ func main() {
 			fmt.Printf("Scraper error: %f\n", err)
 			continue
 		}
+		fmt.Printf("Got %v listings.\n", len(listings.Listings))
+		fmt.Printf("Sending to %v channels...\n", len(d.Channels))
 
-		var wg sync.WaitGroup
-		for _, channel := range d.Channels {
-			wg.Add(1)
-			go func(c *discord.Channel) {
-				fmt.Printf("Cleaning Discord for %v...\n", c.Duty)
-				err = d.CleanChannel(c.ID)
-				if err != nil {
-					fmt.Printf("Discord error cleaning channel: %f\n", err)
-				}
+		for _, c := range d.Channels {
+			fmt.Printf("Cleaning Discord for %v...\n", c.Duty)
+			err = d.CleanChannel(c.ID)
+			if err != nil {
+				fmt.Printf("Discord error cleaning channel: %f\n", err)
+			}
 
-				fmt.Printf("Updating Discord for %v...\n", c.Duty)
-				err = d.PostListings(c.ID, listings, c.Duty, c.DataCentres)
-				if err != nil {
-					fmt.Printf("Discord error updating messages: %f\n", err)
-				}
-				wg.Done()
-			}(channel)
+			fmt.Printf("Updating Discord for %v...\n", c.Duty)
+			err = d.PostListings(c.ID, listings, c.Duty, c.DataCentres)
+			if err != nil {
+				fmt.Printf("Discord error updating messages: %f\n", err)
+			}
+			time.Sleep(1 * time.Second)
 		}
-		wg.Wait()
 		if once != "false" {
 			os.Exit(0)
 		}
