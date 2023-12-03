@@ -54,6 +54,7 @@ func main() {
 		fmt.Printf("Sending to %v channels...\n", len(d.Channels))
 
 		for _, c := range d.Channels {
+			startTime := time.Now()
 			fmt.Printf("Cleaning Discord for %v (%v)...\n", c.Name, c.Duty)
 			err = d.CleanChannel(c.ID)
 			if err != nil {
@@ -65,8 +66,9 @@ func main() {
 			if err != nil {
 				fmt.Printf("Discord error updating messages: %f\n", err)
 			}
-			time.Sleep(500 * time.Millisecond)
-			totalWait -= (500 * time.Millisecond)
+			endTime := time.Now()
+			duration := endTime.Sub(startTime)
+			totalWait -= duration
 		}
 		if once != "false" {
 			os.Exit(0)
