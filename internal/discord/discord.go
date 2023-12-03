@@ -45,11 +45,13 @@ func (d *Discord) CleanChannel(channelId string) error {
 	if err != nil {
 		return fmt.Errorf("Could not list messages: %f", err)
 	}
+	messageIds := []string{}
 	for _, message := range messages {
-		err := d.Session.ChannelMessageDelete(channelId, message.ID)
-		if err != nil {
-			return fmt.Errorf("Could not delete message %+v: %f", message, err)
-		}
+		messageIds = append(messageIds, message.ID)
+	}
+	err = d.Session.ChannelMessagesBulkDelete(channelId, messageIds)
+	if err != nil {
+		return fmt.Errorf("Could not bulk delete messages: %f", err)
 	}
 
 	return nil
