@@ -3,7 +3,7 @@ module github.com/Veraticus/findingway
 go 1.21
 
 require (
-	github.com/bwmarrin/discordgo v0.27.1
+	github.com/bwmarrin/discordgo v0.27.2-0.20230922130345-1f0b57f11024
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/stretchr/testify v1.7.4
 	gopkg.in/yaml.v2 v2.4.0
