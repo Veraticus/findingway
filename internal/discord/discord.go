@@ -28,6 +28,8 @@ func (d *Discord) Start() error {
 	if err != nil {
 		return fmt.Errorf("Could not start Discord: %f", err)
 	}
+	s.ShouldRetryOnRateLimit = false
+	s.LogLevel = discordgo.LogInformational
 
 	err = s.Open()
 	if err != nil {

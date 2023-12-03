@@ -64,7 +64,7 @@ func main() {
 				fmt.Printf("Updating Discord for %v...\n", c.Duty)
 				err = d.PostListings(c.ID, listings, c.Duty, c.DataCentres)
 				if err != nil {
-					fmt.Printf("Discord error updating messagea: %f\n", err)
+					fmt.Printf("Discord error updating messages: %f\n", err)
 				}
 				wg.Done()
 			}(channel)
