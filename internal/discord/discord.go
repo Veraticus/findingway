@@ -18,6 +18,7 @@ type Discord struct {
 }
 
 type Channel struct {
+	Name        string   `yaml:"name"`
 	ID          string   `yaml:"id"`
 	Duty        string   `yaml:"duty"`
 	DataCentres []string `yaml:"dataCentres"`
@@ -29,7 +30,6 @@ func (d *Discord) Start() error {
 		return fmt.Errorf("Could not start Discord: %f", err)
 	}
 	s.ShouldRetryOnRateLimit = false
-	s.LogLevel = discordgo.LogInformational
 
 	err = s.Open()
 	if err != nil {

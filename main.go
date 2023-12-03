@@ -43,6 +43,7 @@ func main() {
 
 	fmt.Printf("Starting findingway...\n")
 	for {
+		totalWait := 3 * time.Minute
 		fmt.Printf("Scraping source...\n")
 		listings, err := scraper.Scrape()
 		if err != nil {
@@ -53,24 +54,25 @@ func main() {
 		fmt.Printf("Sending to %v channels...\n", len(d.Channels))
 
 		for _, c := range d.Channels {
-			fmt.Printf("Cleaning Discord for %v...\n", c.Duty)
+			fmt.Printf("Cleaning Discord for %v (%v)...\n", c.Name, c.Duty)
 			err = d.CleanChannel(c.ID)
 			if err != nil {
 				fmt.Printf("Discord error cleaning channel: %f\n", err)
 			}
 
-			fmt.Printf("Updating Discord for %v...\n", c.Duty)
+			fmt.Printf("Updating Discord for %v (%v)...\n", c.Name, c.Duty)
 			err = d.PostListings(c.ID, listings, c.Duty, c.DataCentres)
 			if err != nil {
 				fmt.Printf("Discord error updating messages: %f\n", err)
 			}
-			time.Sleep(1 * time.Second)
+			time.Sleep(500 * time.Millisecond)
+			totalWait -= (500 * time.Millisecond)
 		}
 		if once != "false" {
 			os.Exit(0)
 		}
-
-		time.Sleep(3 * time.Minute)
+		fmt.Printf("Sleeping for %v...\n", totalWait)
+		time.Sleep(totalWait)
 	}
 
 }

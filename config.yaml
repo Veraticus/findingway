@@ -1,244 +1,325 @@
 channels:
-- id: "991199065196990585" # APD PF check
+- id: "991199065196990585"
+  name: "APD PF check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1003797164222337094" # UPR ucob pf check
+- id: "1003797164222337094"
+  name: "UPR ucob pf check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Primal]
-- id: "1003797182639525899" # UPR uwu pf check
+- id: "1003797182639525899"
+  name: "UPR uwu pf check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Primal]
-- id: "1003797201895571508" # UPR tea pf check
+- id: "1003797201895571508"
+  name: "UPR tea pf check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Primal]
-- id: "1003797214491066498" # UPR dsr pf check
+- id: "1003797214491066498"
+  name: "UPR dsr pf check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Primal]
-- id: "1066846031867809894" # UPR top pf check
+- id: "1066846031867809894"
+  name: "UPR top pf check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Primal]
-- id: "1037081516523651132" # UDR ucob pf check
+- id: "1037081516523651132"
+  name: "UDR ucob pf check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1037081529366630451" # UDR uwu pf check
+- id: "1037081529366630451"
+  name: "UDR uwu pf check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1037081703283433502" # UDR tea pf check
+- id: "1037081703283433502"
+  name: "UDR tea pf check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1037081714683547718" # UDR dsr pf check
+- id: "1037081714683547718"
+  name: "UDR dsr pf check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1061465824780628038" # TOP aether
+- id: "1061465824780628038"
+  name: "TOP aether"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether]
-- id: "1061465841843044393" # TOP primal
+- id: "1061465841843044393"
+  name: "TOP primal"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Primal]
-- id: "1061465854748926012" # TOP crystal
+- id: "1061465854748926012"
+  name: "TOP crystal"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Crystal]
-- id: "1061465866039984238" # TOP dynamis
+- id: "1061465866039984238"
+  name: "TOP dynamis"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Dynamis]
-- id: "989246195857756220" # UAR uwu-check
+- id: "989246195857756220"
+  name: "UAR uwu-check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Aether]
-- id: "989246217076736030" # UAR ucob-check
+- id: "989246217076736030"
+  name: "UAR ucob-check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Aether]
-- id: "989246232994140242" # UAR tea-check
+- id: "989246232994140242"
+  name: "UAR tea-check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Aether]
-- id: "989246259359547402" # UAR dru-check
+- id: "989246259359547402"
+  name: "UAR dru-check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Aether]
-- id: "989246280461074512" # UAR top-check
+- id: "989246280461074512"
+  name: "UAR top-check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether]
-- id: "1106427289908035654" # Mala top check
+- id: "1106427289908035654"
+  name: "Mala top check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether]
-- id: "1106427303573065818" # Mala dsr check
+- id: "1106427303573065818"
+  name: "Mala dsr check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Aether]
-- id: "1106427382392442941" # Mala tea check
+- id: "1106427382392442941"
+  name: "Mala tea check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Aether]
-- id: "1106427321893793853" # Mala uwu check
+- id: "1106427321893793853"
+  name: "Mala uwu check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Aether]
-- id: "1106427345746804757" # Mala ucob check
+- id: "1106427345746804757"
+  name: "Mala ucob check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Aether]
-- id: "1112960917051809792" # Mala pf check 1
+- id: "1112960917051809792"
+  name: "Mala pf check 1"
   duty: "Anabaseios: The Ninth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1112960959196176474" # Mala pf check 2
+- id: "1112960959196176474"
+  name: "Mala pf check 2"
   duty: "Anabaseios: The Tenth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1112960989508403300" # Mala pf check 3
+- id: "1112960989508403300"
+  name: "Mala pf check 3"
   duty: "Anabaseios: The Eleventh Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1112961011788566558"  # Mala pf check 4
+- id: "1112961011788566558"
+  name: "Mala pf check 4"
   duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1120053963673309245" # Savage Learning Academy p9s
+- id: "1120053963673309245"
+  name: "Savage Learning Academy p9s"
   duty: "Anabaseios: The Ninth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1120053976369471539" # Savage Learning Academy p10s
+- id: "1120053976369471539"
+  name: "Savage Learning Academy p10s"
   duty: "Anabaseios: The Tenth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1120053989896097882" # Savage Learning Academy p11s
+- id: "1120053989896097882"
+  name: "Savage Learning Academy p11s"
   duty: "Anabaseios: The Eleventh Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1120054005419221063" # Savage Learning Academy p12s
+- id: "1120054005419221063"
+  name: "Savage Learning Academy p12s"
   duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1168327640638296065" # golden sheep top check
+- id: "1168327640638296065"
+  name: "golden sheep top check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1168327674708631633" # golden sheep dsr check
+- id: "1168327674708631633"
+  name: "golden sheep dsr check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1168327701694783498" # golden sheep tea check
+- id: "1168327701694783498"
+  name: "golden sheep tea check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1168327733357576283" # golden sheep uwu check
+- id: "1168327733357576283"
+  name: "golden sheep uwu check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1168327757374181446" # golden sheep ucob check
+- id: "1168327757374181446"
+  name: "golden sheep ucob check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Aether, Crystal, Primal, Dynamis]
-- id: "1172326220352987257" # raidingway aether ucob check
+- id: "1172326220352987257"
+  name: "raidingway aether ucob check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Aether]
-- id: "1172326251118198814" # raidingway aether uwu check
+- id: "1172326251118198814"
+  name: "raidingway aether uwu check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Aether]
-- id: "1172326284257407027" # raidingway aether tea check
+- id: "1172326284257407027"
+  name: "raidingway aether tea check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Aether]
-- id: "1172326306847920150" # raidingway aether dsr check
+- id: "1172326306847920150"
+  name: "raidingway aether dsr check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Aether]
-- id: "1172326326645051412" # raidingway aether top check
+- id: "1172326326645051412"
+  name: "raidingway aether top check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether]
-- id: "1172327931767427072" # raidingway aether p9s check
+- id: "1172327931767427072"
+  name: "raidingway aether p9s check"
   duty: "Anabaseios: The Ninth Circle (Savage)"
   dataCentres: [Aether]
-- id: "1172327947668045885" # raidingway aether p10s check
+- id: "1172327947668045885"
+  name: "raidingway aether p10s check"
   duty: "Anabaseios: The Tenth Circle (Savage)"
   dataCentres: [Aether]
-- id: "1172327961622487070" # raidingway aether p11s check
+- id: "1172327961622487070"
+  name: "raidingway aether p11s check"
   duty: "Anabaseios: The Eleventh Circle (Savage)"
   dataCentres: [Aether]
-- id: "1172327983952953445" # raidingway aether p12s check
+- id: "1172327983952953445"
+  name: "raidingway aether p12s check"
   duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Aether]
-- id: "1172328090836406415" # raidingway aether zeromus
+- id: "1172328090836406415"
+  name: "raidingway aether zeromus"
   duty: "The Abyssal Fracture (Extreme)"
   dataCentres: [Aether]
-- id: "1174341288678662215" # raidingway aether king thordan
+- id: "1174341288678662215"
+  name: "raidingway aether king thordan"
   duty: "The Singularity Reactor (Unreal)"
   dataCentres: [Aether]
-- id: "1172330360474968084" # raidingway crystal ucob check
+- id: "1172330360474968084"
+  name: "raidingway crystal ucob check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Crystal]
-- id: "1172330411104407642" # raidingway crystal uwu check
+- id: "1172330411104407642"
+  name: "raidingway crystal uwu check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Crystal]
-- id: "1172330431958499410" # raidingway crystal tea check
+- id: "1172330431958499410"
+  name: "raidingway crystal tea check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Crystal]
-- id: "1172330445300568105" # raidingway crystal dsr check
+- id: "1172330445300568105"
+  name: "raidingway crystal dsr check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Crystal]
-- id: "1172330456289652858" # raidingway crystal top check
+- id: "1172330456289652858"
+  name: "raidingway crystal top check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Crystal]
-- id: "1172330512891781210" # raidingway crystal p9s check
+- id: "1172330512891781210"
+  name: "raidingway crystal p9s check"
   duty: "Anabaseios: The Ninth Circle (Savage)"
   dataCentres: [Crystal]
-- id: "1172330529698353322" # raidingway crystal p10s check
+- id: "1172330529698353322"
+  name: "raidingway crystal p10s check"
   duty: "Anabaseios: The Tenth Circle (Savage)"
   dataCentres: [Crystal]
-- id: "1172330540117016597" # raidingway crystal p11s check
+- id: "1172330540117016597"
+  name: "raidingway crystal p11s check"
   duty: "Anabaseios: The Eleventh Circle (Savage)"
   dataCentres: [Crystal]
-- id: "1172330551261265951" # raidingway crystal p12s check
+- id: "1172330551261265951"
+  name: "raidingway crystal p12s check"
   duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Crystal]
-- id: "1172330629749293169" # raidingway crystal zeromus
+- id: "1172330629749293169"
+  name: "raidingway crystal zeromus"
   duty: "The Abyssal Fracture (Extreme)"
   dataCentres: [Crystal]
-- id: "1174341478194102282" # raidingway crystal king thordan
+- id: "1174341478194102282"
+  name: "raidingway crystal king thordan"
   duty: "The Singularity Reactor (Unreal)"
   dataCentres: [Crystal]
-- id: "1172330964572176386" # raidingway dynamis ucob check
+- id: "1172330964572176386"
+  name: "raidingway dynamis ucob check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1172330991587692585" # raidingway dynamis uwu check
+- id: "1172330991587692585"
+  name: "raidingway dynamis uwu check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1172331006292938802" # raidingway dynamis tea check
+- id: "1172331006292938802"
+  name: "raidingway dynamis tea check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1172331029026062357" # raidingway dynamis dsr check
+- id: "1172331029026062357"
+  name: "raidingway dynamis dsr check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1172331043802599434" # raidingway dynamis top check
+- id: "1172331043802599434"
+  name: "raidingway dynamis top check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Dynamis]
-- id: "1172331185343582208" # raidingway dynamis p9s check
+- id: "1172331185343582208"
+  name: "raidingway dynamis p9s check"
   duty: "Anabaseios: The Ninth Circle (Savage)"
   dataCentres: [Dynamis]
-- id: "1172331212698832907" # raidingway dynamis p10s check
+- id: "1172331212698832907"
+  name: "raidingway dynamis p10s check"
   duty: "Anabaseios: The Tenth Circle (Savage)"
   dataCentres: [Dynamis]
-- id: "1172331227898978334" # raidingway dynamis p11s check
+- id: "1172331227898978334"
+  name: "raidingway dynamis p11s check"
   duty: "Anabaseios: The Eleventh Circle (Savage)"
   dataCentres: [Dynamis]
-- id: "1172331199751008286" # raidingway dynamis p12s check
+- id: "1172331199751008286"
+  name: "raidingway dynamis p12s check"
   duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Dynamis]
-- id: "1172331314461016114" # raidingway dynamis zeromus
+- id: "1172331314461016114"
+  name: "raidingway dynamis zeromus"
   duty: "The Abyssal Fracture (Extreme)"
   dataCentres: [Dynamis]
-- id: "1174342061915389992" # raidingway dynamis king thordan
+- id: "1174342061915389992"
+  name: "raidingway dynamis king thordan"
   duty: "The Singularity Reactor (Unreal)"
   dataCentres: [Dynamis]
-- id: "1172332940781441104" # raidingway primal ucob check
+- id: "1172332940781441104"
+  name: "raidingway primal ucob check"
   duty: "The Unending Coil of Bahamut (Ultimate)"
   dataCentres: [Primal]
-- id: "1172332955478274118" # raidingway primal uwu check
+- id: "1172332955478274118"
+  name: "raidingway primal uwu check"
   duty: "The Weapon's Refrain (Ultimate)"
   dataCentres: [Primal]
-- id: "1172332996104298587" # raidingway primal tea check
+- id: "1172332996104298587"
+  name: "raidingway primal tea check"
   duty: "The Epic of Alexander (Ultimate)"
   dataCentres: [Primal]
-- id: "1172333014538276945" # raidingway primal dsr check
+- id: "1172333014538276945"
+  name: "raidingway primal dsr check"
   duty: "Dragonsong's Reprise (Ultimate)"
   dataCentres: [Primal]
-- id: "1172333025942585374" # raidingway primal top check
+- id: "1172333025942585374"
+  name: "raidingway primal top check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Primal]
-- id: "1172333109589585920" # raidingway primal p9s check
+- id: "1172333109589585920"
+  name: "raidingway primal p9s check"
   duty: "Anabaseios: The Ninth Circle (Savage)"
   dataCentres: [Primal]
-- id: "1172333119626543166" # raidingway primal p10s check
+- id: "1172333119626543166"
+  name: "raidingway primal p10s check"
   duty: "Anabaseios: The Tenth Circle (Savage)"
   dataCentres: [Primal]
-- id: "1172333133035753553" # raidingway primal p11s check
+- id: "1172333133035753553"
+  name: "raidingway primal p11s check"
   duty: "Anabaseios: The Eleventh Circle (Savage)"
   dataCentres: [Primal]
-- id: "1172333144511352832" # raidingway primal p12s check
+- id: "1172333144511352832"
+  name: "raidingway primal p12s check"
   duty: "Anabaseios: The Twelfth Circle (Savage)"
   dataCentres: [Primal]
-- id: "1172333202476634142" # raidingway primal zeromus
+- id: "1172333202476634142"
+  name: "raidingway primal zeromus"
   duty: "The Abyssal Fracture (Extreme)"
   dataCentres: [Primal]
-- id: "1174342335404986469" # raidingway primal king thordan
+- id: "1174342335404986469"
+  name: "raidingway primal king thordan"
   duty: "The Singularity Reactor (Unreal)"
   dataCentres: [Primal]
