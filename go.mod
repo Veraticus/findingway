@@ -1,6 +1,6 @@
 module github.com/Veraticus/findingway
 
-go 1.21
+go 1.22.1
 
 require (
 	github.com/bwmarrin/discordgo v0.27.2-0.20230922130345-1f0b57f11024
@@ -17,6 +17,7 @@ require (
 	github.com/antchfx/xpath v1.2.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/gocolly/colly v1.2.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect

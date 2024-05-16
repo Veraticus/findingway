@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestStartDiscord(t *testing.T) {
 	token, ok := os.LookupEnv("DISCORD_TOKEN")
 	assert.Equal(t, ok, true)
@@ -63,12 +62,12 @@ func TestPostListings(t *testing.T) {
 		},
 	}
 
-    var ffxivListings ffxiv.Listings
-    for _, item := range listings {
-        ffxivListings.Listings = append(ffxivListings.Listings, item.listing)
-    }
+	var ffxivListings ffxiv.Listings
+	for _, item := range listings {
+		ffxivListings.Listings = append(ffxivListings.Listings, item.listing)
+	}
 
-    // testing in #staff-actions
-    listErr := disc.PostListings("1174350271304958032", &ffxivListings, "Dragonsong's Reprise (Ultimate)", []string{"Aether"})
-    assert.Equal(t, listErr, nil)
+	// testing in #staff-actions
+	listErr := disc.PostListings("1174350271304958032", &ffxivListings, "Dragonsong's Reprise (Ultimate)", "Aether")
+	assert.Equal(t, listErr, nil)
 }

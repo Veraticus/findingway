@@ -40,15 +40,13 @@ func NewSlot() *Slot {
 	}
 }
 
-func (ls *Listings) ForDutyAndDataCentres(duty string, dataCentres []string) *Listings {
+func (ls *Listings) ForDutyAndDataCentre(duty string, dataCentre string) *Listings {
 	listings := &Listings{Listings: []*Listing{}}
 
 	for _, l := range ls.Listings {
 		if l.Duty == duty {
-			for _, dataCentre := range dataCentres {
-				if l.DataCentre == dataCentre {
-					listings.Listings = append(listings.Listings, l)
-				}
+			if l.DataCentre == dataCentre {
+				listings.Listings = append(listings.Listings, l)
 			}
 		}
 	}

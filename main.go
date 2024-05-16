@@ -62,7 +62,9 @@ func main() {
 			}
 
 			fmt.Printf("Updating Discord for %v (%v)...\n", c.Name, c.Duty)
-			err = d.PostListings(c.ID, listings, c.Duty, c.DataCentres)
+			for _, dataCentre := range c.DataCentres {
+				err = d.PostListings(c.ID, listings, c.Duty, dataCentre)
+			}
 			if err != nil {
 				fmt.Printf("Discord error updating messages: %f\n", err)
 			}

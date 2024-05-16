@@ -57,8 +57,8 @@ func (d *Discord) CleanChannel(channelId string) error {
 	return nil
 }
 
-func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty string, dataCentres []string) error {
-	scopedListings := listings.ForDutyAndDataCentres(duty, dataCentres)
+func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty string, dataCentre string) error {
+	scopedListings := listings.ForDutyAndDataCentre(duty, dataCentre)
 
 	mostRecent, err := scopedListings.MostRecentUpdated()
 	if err != nil {
@@ -77,15 +77,8 @@ func (d *Discord) PostListings(channelId string, listings *ffxiv.Listings, duty 
 		}
 	}
 
-	dataCentresString := ""
-	if len(dataCentres) == 1 {
-		dataCentresString = dataCentres[0]
-	} else if len(dataCentres) > 1 {
-		dataCentresString = strings.Join(dataCentres, ", ")
-	}
-
 	headerEmbed := &discordgo.MessageEmbed{
-		Title: fmt.Sprintf("%s PFs (%v)", duty, dataCentresString),
+		Title: fmt.Sprintf("%s PFs (%v)", duty, dataCentre),
 		Type:  discordgo.EmbedTypeRich,
 		Color: 0x6600ff,
 		Description: fmt.Sprintf(
