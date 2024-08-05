@@ -167,3 +167,31 @@ channels:
   name: "naur top check"
   duty: "The Omega Protocol (Ultimate)"
   dataCentres: [Aether, Crystal, Dynamis, Primal]
+- id: "1270053612206297088"
+  name: "nase m1s"
+  duty: "AAC Light-heavyweight M1 (Savage)"
+  dataCentres: [Aether, Crystal, Dynamis, Primal]
+- id: "1270053648742744155"
+  name: "nase m2s"
+  duty: "AAC Light-heavyweight M2 (Savage)"
+  dataCentres: [Aether, Crystal, Dynamis, Primal]
+- id: "1270053664626577512"
+  name: "nase m3s"
+  duty: "AAC Light-heavyweight M3 (Savage)"
+  dataCentres: [Aether, Crystal, Dynamis, Primal]
+- id: "1270053677666668668"
+  name: "nase m4s"
+  duty: "AAC Light-heavyweight M4 (Savage)"
+  dataCentres: [Aether, Crystal, Dynamis, Primal]
+- id: "1270053677666668668"
+  name: "nase m4s"
+  duty: "AAC Light-heavyweight M4 (Savage)"
+  dataCentres: [Aether, Crystal, Dynamis, Primal]
+- id: "1270053694972629053"
+  name: "nase ex1"
+  duty: "Worqor Lar Dor (Extreme)"
+  dataCentres: [Aether, Crystal, Dynamis, Primal]
+- id: "1270053707106750526"
+  name: "nase ex2"
+  duty: "Everkeep (Extreme)"
+  dataCentres: [Aether, Crystal, Dynamis, Primal]
