@@ -20,12 +20,14 @@ const (
 	NIN
 	MNK
 	RPR
+	VPR
 	BRD
 	MCH
 	DNC
 	BLM
 	BLU
 	SMN
+	PCT
 	RDM
 	LNC
 	PUG
@@ -71,6 +73,8 @@ func JobFromAbbreviation(abbreviation string) Job {
 		return MNK
 	case "RPR":
 		return RPR
+	case "VPR":
+		return VPR
 	case "BRD":
 		return BRD
 	case "MCH":
@@ -83,6 +87,8 @@ func JobFromAbbreviation(abbreviation string) Job {
 		return BLU
 	case "SMN":
 		return SMN
+	case "PCT":
+		return PCT
 	case "RDM":
 		return RDM
 	case "LNC":
@@ -102,53 +108,57 @@ func JobFromAbbreviation(abbreviation string) Job {
 func (j Job) Emoji() string {
 	switch j {
 	case GNB:
-		return "<:GNB:991374319190016080>"
+		return "<:Gunbreaker:1240636120249794620> "
 	case PLD:
-		return "<:PLD:991374318175015012>"
+		return "<:Paladin:1240636121650827274>"
 	case GLD:
 		return "<:GLD:991374316904136775>"
 	case DRK:
-		return "<:DRK:991374315536793660>"
+		return "<:DarkKnight:1240636123965816862>"
 	case WAR:
-		return "<:WAR:991374314454659103>"
+		return "<:Warrior:1240636122711986257>"
 	case MRD:
 		return "<:MRD:991374313108291624>"
 	case SCH:
-		return "<:SCH:991374308796530848>"
+		return "<:Scholar:1240636166542331944>"
 	case ACN:
 		return "<:ACN:991374307328544879>"
 	case SGE:
-		return "<:SGE:991374305839554640>"
+		return "<:Sage:1240636165057548338>"
 	case AST:
-		return "<:AST:991374326823661659>"
+		return "<:Astrologian:1240636168685617154>"
 	case WHM:
-		return "<:WHM:991374304753221642>"
+		return "<:WhiteMage:1240636167511080960>"
 	case CNJ:
 		return "<:CNJ:991374303138427000>"
 	case SAM:
-		return "<:SAM:991374325317906534>"
+		return "<:Samurai:1240636206237089852>"
 	case DRG:
-		return "<:DRG:991374301636866048>"
+		return "<:Dragoon:1240636213216411689>"
 	case NIN:
-		return "<:NIN:991374324374188053>"
+		return "<:Ninja:1240636202193784922>"
 	case MNK:
-		return "<:MNK:991374300370190346>"
+		return "<:Monk:1240636200285372498>"
 	case RPR:
-		return "<:RPR:991374299350978620>"
+		return "<:Reaper:1240636203527573545>"
+	case VPR:
+		return "<:Viper:1243593551254651000>"
 	case BRD:
-		return "<:BRD:991374298168168528>"
+		return "<:Bard:1240636208758128691>"
 	case MCH:
-		return "<:MCH:991374296813412442>"
+		return "<:Machinist:1240636198960234526>"
 	case DNC:
-		return "<:DNC:991374295475437588>"
+		return "<:Dancer:1240636251858665542>"
 	case BLM:
-		return "<:BLM:991374293978071081>"
+		return "<:BlackMage:1240636210133602407>"
 	case BLU:
-		return "<:BLU:991374292929495151>"
+		return "<:blu:1277665256730001520>"
 	case SMN:
-		return "<:SMN:991374323245924382>"
+		return "<:Summoner:1240636207717810247>"
 	case RDM:
-		return "<:RDM:991374291776065576>"
+		return "<:RedMage:1240636205025067038>"
+	case PCT:
+		return "<:Pictomancer:1243593616920936598>"
 	case LNC:
 		return "<:LNC:991374290714898493>"
 	case PUG:
