@@ -108,57 +108,57 @@ func JobFromAbbreviation(abbreviation string) Job {
 func (j Job) Emoji() string {
 	switch j {
 	case GNB:
-		return "<:Gunbreaker:1240636120249794620> "
+		return "<:GBR:1277726613773094943>"
 	case PLD:
-		return "<:Paladin:1240636121650827274>"
+		return "<:PLD:1277726628721463401>"
 	case GLD:
 		return "<:gld:1277675881334046761>"
 	case DRK:
-		return "<:DarkKnight:1240636123965816862>"
+		return "<:DRK:1277726599860715663>"
 	case WAR:
-		return "<:Warrior:1240636122711986257>"
+		return "<:WAR:1277726641287725088>"
 	case MRD:
 		return "<:mrd:1277675899629600768>"
 	case SCH:
-		return "<:Scholar:1240636166542331944>"
+		return "<:SCH:1277726703279538227>"
 	case ACN:
 		return "<:acn:1277675927374925824>"
 	case SGE:
-		return "<:Sage:1240636165057548338>"
+		return "<:SGE:1277726715988152330>"
 	case AST:
-		return "<:Astrologian:1240636168685617154>"
+		return "<:AST:1277726729695137936>"
 	case WHM:
-		return "<:WhiteMage:1240636167511080960>"
+		return "<:WHM:1277726691137163315>"
 	case CNJ:
 		return "<:cnj:1277675946358345788>"
 	case SAM:
-		return "<:Samurai:1240636206237089852>"
+		return "<:SAM:1277726922419474482>"
 	case DRG:
-		return "<:Dragoon:1240636213216411689>"
+		return "<:DRG:1277726895324008532>"
 	case NIN:
-		return "<:Ninja:1240636202193784922>"
+		return "<:NIN:1277726908234203196>"
 	case MNK:
-		return "<:Monk:1240636200285372498>"
+		return "<:MNK:1277726879331123221>"
 	case RPR:
-		return "<:Reaper:1240636203527573545>"
+		return "<:RPR:1277726936457674763>"
 	case VPR:
-		return "<:Viper:1243593551254651000>"
+		return "<:VPR:1277726962076487680>"
 	case BRD:
-		return "<:Bard:1240636208758128691>"
+		return "<:BRD:1277727023715979358>"
 	case MCH:
-		return "<:Machinist:1240636198960234526>"
+		return "<:MCH:1277727037540532385>"
 	case DNC:
-		return "<:Dancer:1240636251858665542>"
+		return "<:DNC:1277727057131868261>"
 	case BLM:
-		return "<:BlackMage:1240636210133602407>"
+		return "<:BLM:1277727132159705200>"
 	case BLU:
-		return "<:blu:1277665256730001520>"
+		return "<:BLU:1277727209003683850>"
 	case SMN:
-		return "<:Summoner:1240636207717810247>"
+		return "<:SMN:1277727150598000742>"
 	case RDM:
-		return "<:RedMage:1240636205025067038>"
+		return "<:RDM:1277727163516194907>"
 	case PCT:
-		return "<:Pictomancer:1243593616920936598>"
+		return "<:PCT:1277727183497990288>"
 	case LNC:
 		return "<:lnc:1277675968701661217>"
 	case PUG:
@@ -170,5 +170,5 @@ func (j Job) Emoji() string {
 	case ARC:
 		return "<:arc:1277676046992408636>"
 	}
-	return "<:CUL:991374283836227604>"
+	return "<:CrafterorGatherer:1277722412557009057>"
 }
