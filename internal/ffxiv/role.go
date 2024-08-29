@@ -41,5 +41,5 @@ func (rs Roles) Emoji() string {
 		return "<:tankhealerdps:1277661062661017620>"
 	}
 
-	return "<:DOH:1278745659079524352>"
+	return "<:AnyRole:1277722398803886242>"
 }

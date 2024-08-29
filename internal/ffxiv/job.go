@@ -170,5 +170,5 @@ func (j Job) Emoji() string {
 	case ARC:
 		return "<:arc:1277676046992408636>"
 	}
-	return "<:CrafterorGatherer:1277722412557009057>"
+	return "<:DOH:1278745659079524352>"
 }
