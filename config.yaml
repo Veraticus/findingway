@@ -187,11 +187,7 @@ channels:
   name: "nase m4s"
   duty: "AAC Light-heavyweight M4 (Savage)"
   dataCentres: [Aether, Crystal, Dynamis, Primal]
-- id: "1270053694972629053"
-  name: "nase ex1"
-  duty: "Worqor Lar Dor (Extreme)"
-  dataCentres: [Aether, Crystal, Dynamis, Primal]
-- id: "1270053707106750526"
-  name: "nase ex2"
-  duty: "Everkeep (Extreme)"
+- id: "1308820840217055322"
+  name: "nase ex3"
+  duty: "The Minstrel’s Ballad: Sphene's Burden"
   dataCentres: [Aether, Crystal, Dynamis, Primal]
